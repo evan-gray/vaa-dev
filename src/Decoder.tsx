@@ -53,6 +53,13 @@ const tokenTransferToString = (tokenTransfer: TokenTransfer) => `{
 
 export default function Decoder() {
   const [vaaString, setVaaString] = useState<string>("");
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const vaa = params.get("vaa");
+    if (vaa) {
+      setVaaString(decodeURIComponent(vaa));
+    }
+  }, []);
   const [parsed, setParsed] = useState<ParsedVaaAndPayload | null>(null);
   useEffect(() => {
     setParsed(null);
@@ -78,6 +85,9 @@ export default function Decoder() {
   }, [vaaString]);
   const handleHexChange = useCallback((e: any) => {
     setVaaString(e.target.value);
+    const params = new URLSearchParams();
+    params.set("vaa", encodeURIComponent(e.target.value));
+    window.history.replaceState(undefined, "", `?${params.toString()}`);
   }, []);
   return (
     <Grid container spacing={2}>
