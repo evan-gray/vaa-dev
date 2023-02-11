@@ -84,9 +84,10 @@ export default function Decoder() {
     }
   }, [vaaString]);
   const handleHexChange = useCallback((e: any) => {
-    setVaaString(e.target.value);
+    const value: string = e.target.value.trim();
+    setVaaString(value);
     const params = new URLSearchParams();
-    params.set("vaa", encodeURIComponent(e.target.value));
+    params.set("vaa", encodeURIComponent(value));
     window.history.replaceState(undefined, "", `?${params.toString()}`);
   }, []);
   return (
