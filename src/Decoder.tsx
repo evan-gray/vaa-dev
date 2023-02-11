@@ -26,6 +26,20 @@ function idToStr(id: number): string {
   return s ? `${id} (${s})` : id.toString();
 }
 
+function transferTypeToString(
+  transferType:
+    | TokenBridgePayload.Transfer
+    | TokenBridgePayload.TransferWithPayload
+): string {
+  if (transferType === TokenBridgePayload.Transfer) {
+    return `${transferType} (Transfer)`;
+  }
+  if (transferType === TokenBridgePayload.TransferWithPayload) {
+    return `${transferType} (Transfer with Payload)`;
+  }
+  return transferType;
+}
+
 const vaaToString = (vaa: ParsedVaa) => `{
   version: ${vaa.version},
   guardianSetIndex: ${vaa.guardianSetIndex},
@@ -41,7 +55,7 @@ const vaaToString = (vaa: ParsedVaa) => `{
 }`;
 
 const tokenTransferToString = (tokenTransfer: TokenTransfer) => `{
-  payloadType: ${tokenTransfer.payloadType},
+  payloadType: ${transferTypeToString(tokenTransfer.payloadType)},
   amount: ${tokenTransfer.amount.toString()},
   tokenChain: ${idToStr(tokenTransfer.tokenChain)},
   tokenAddress: ${tokenTransfer.tokenAddress.toString("hex")},
