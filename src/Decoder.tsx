@@ -14,11 +14,17 @@ import {
   TokenTransfer,
 } from "./sdk/tokenBridge";
 import { ParsedVaa, parseVaa } from "./sdk/wormhole";
+import chainIdToString from "./utils/chainIdToString";
 
 type ParsedVaaAndPayload = {
   vaa?: ParsedVaa;
   tokenBridge?: TokenTransfer;
 };
+
+function idToStr(id: number): string {
+  const s = chainIdToString(id);
+  return s ? `${id} (${s})` : id.toString();
+}
 
 const vaaToString = (vaa: ParsedVaa) => `{
   version: ${vaa.version},
@@ -28,7 +34,7 @@ const vaaToString = (vaa: ParsedVaa) => `{
   vaa.timestamp * 1000
 ).toLocaleString()}),
   nonce: ${vaa.nonce},
-  emitterChain: ${vaa.emitterChain},
+  emitterChain: ${idToStr(vaa.emitterChain)},
   emitterAddress: ${vaa.emitterAddress.toString("hex")},
   sequence: ${vaa.sequence.toString()},
   consistencyLevel: ${vaa.consistencyLevel},
@@ -37,9 +43,9 @@ const vaaToString = (vaa: ParsedVaa) => `{
 const tokenTransferToString = (tokenTransfer: TokenTransfer) => `{
   payloadType: ${tokenTransfer.payloadType},
   amount: ${tokenTransfer.amount.toString()},
-  tokenChain: ${tokenTransfer.tokenChain},
+  tokenChain: ${idToStr(tokenTransfer.tokenChain)},
   tokenAddress: ${tokenTransfer.tokenAddress.toString("hex")},
-  toChain: ${tokenTransfer.toChain},
+  toChain: ${idToStr(tokenTransfer.toChain)},
   toAddress: ${tokenTransfer.to.toString("hex")},
   ${
     tokenTransfer.payloadType === TokenBridgePayload.Transfer
