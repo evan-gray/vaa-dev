@@ -7,6 +7,7 @@ import {
 import { grey } from "@mui/material/colors";
 import React from "react";
 import ReactDOM from "react-dom/client";
+import { BrowserRouter as Router } from "react-router-dom";
 import App from "./App";
 
 const root = ReactDOM.createRoot(
@@ -42,6 +43,13 @@ const theme = responsiveFontSizes(
           },
         },
       },
+      MuiButton: {
+        styleOverrides: {
+          root: {
+            textTransform: "none",
+          },
+        },
+      },
     },
   })
 );
@@ -49,7 +57,9 @@ root.render(
   <React.StrictMode>
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <App />
+      <Router>
+        <App />
+      </Router>
     </ThemeProvider>
   </React.StrictMode>
 );
