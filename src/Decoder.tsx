@@ -7,7 +7,8 @@ import {
   Typography,
 } from "@mui/material";
 import { Buffer } from "buffer";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useHistory, useParams } from "react-router";
 import {
   parseTokenTransferPayload,
   TokenBridgePayload,
@@ -155,21 +156,18 @@ export function DecoderComponent({
 }
 
 export default function Decoder() {
-  const [vaaString, setVaaString] = useState<string>("");
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const vaa = params.get("vaa");
-    if (vaa) {
-      setVaaString(decodeURIComponent(vaa));
-    }
-  }, []);
-  const handleHexChange = useCallback((e: any) => {
-    const value: string = e.target.value.trim();
-    setVaaString(value);
-    const params = new URLSearchParams();
-    params.set("vaa", encodeURIComponent(value));
-    window.history.replaceState(undefined, "", `?${params.toString()}`);
-  }, []);
+  const { replace } = useHistory();
+  const { vaa } = useParams<{ vaa?: string }>();
+  const vaaString = useMemo(() => {
+    return vaa ? decodeURIComponent(vaa) : "";
+  }, [vaa]);
+  const handleHexChange = useCallback(
+    (e: any) => {
+      const value: string = e.target.value.trim();
+      replace(`/parse/${encodeURIComponent(value)}`);
+    },
+    [replace]
+  );
   return (
     <DecoderComponent vaaString={vaaString} handleHexChange={handleHexChange} />
   );

@@ -73,14 +73,14 @@ function App() {
       </AppBar>
       <Box m={2}>
         <Switch>
-          <Route exact path="/">
+          <Route exact path={["/parse", "/parse/:vaa"]}>
             <Decoder />
           </Route>
-          <Route exact path="/tx">
+          <Route exact path={["/tx", "/tx/:hash"]}>
             <Transaction />
           </Route>
           <Route>
-            <Redirect to="/" />
+            <Redirect to="/parse" />
           </Route>
         </Switch>
       </Box>
