@@ -15,6 +15,7 @@ import {
   useRouteMatch,
 } from "react-router-dom";
 import Decoder from "./Decoder";
+import Transaction from "./Transaction";
 
 function NavButton({
   label,
@@ -58,6 +59,7 @@ function App() {
             VAA Tools
           </Typography>
           <NavButton to="/" label="Parse" exact />
+          <NavButton to="/tx" label="Fetch" exact />
           <Box sx={{ flexGrow: 1 }} />
           <IconButton
             href="https://github.com/evan-gray/vaa-dev"
@@ -73,6 +75,9 @@ function App() {
         <Switch>
           <Route exact path="/">
             <Decoder />
+          </Route>
+          <Route exact path="/tx">
+            <Transaction />
           </Route>
           <Route>
             <Redirect to="/" />
