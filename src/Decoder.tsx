@@ -71,15 +71,13 @@ const tokenTransferToString = (tokenTransfer: TokenTransfer) => `{
   }
 }`;
 
-export default function Decoder() {
-  const [vaaString, setVaaString] = useState<string>("");
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const vaa = params.get("vaa");
-    if (vaa) {
-      setVaaString(decodeURIComponent(vaa));
-    }
-  }, []);
+export function DecoderComponent({
+  vaaString,
+  handleHexChange,
+}: {
+  vaaString: string;
+  handleHexChange?: (e: any) => void;
+}) {
   const [parsed, setParsed] = useState<ParsedVaaAndPayload | null>(null);
   useEffect(() => {
     setParsed(null);
@@ -103,13 +101,6 @@ export default function Decoder() {
       console.error(e);
     }
   }, [vaaString]);
-  const handleHexChange = useCallback((e: any) => {
-    const value: string = e.target.value.trim();
-    setVaaString(value);
-    const params = new URLSearchParams();
-    params.set("vaa", encodeURIComponent(value));
-    window.history.replaceState(undefined, "", `?${params.toString()}`);
-  }, []);
   return (
     <Grid container spacing={2}>
       <Grid xs={12} md={6} item>
@@ -125,6 +116,7 @@ export default function Decoder() {
               fullWidth
               value={vaaString}
               onChange={handleHexChange}
+              disabled={!handleHexChange}
             />
           </CardContent>
         </Card>
@@ -159,5 +151,26 @@ export default function Decoder() {
         </Card>
       </Grid>
     </Grid>
+  );
+}
+
+export default function Decoder() {
+  const [vaaString, setVaaString] = useState<string>("");
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const vaa = params.get("vaa");
+    if (vaa) {
+      setVaaString(decodeURIComponent(vaa));
+    }
+  }, []);
+  const handleHexChange = useCallback((e: any) => {
+    const value: string = e.target.value.trim();
+    setVaaString(value);
+    const params = new URLSearchParams();
+    params.set("vaa", encodeURIComponent(value));
+    window.history.replaceState(undefined, "", `?${params.toString()}`);
+  }, []);
+  return (
+    <DecoderComponent vaaString={vaaString} handleHexChange={handleHexChange} />
   );
 }
