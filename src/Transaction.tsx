@@ -13,7 +13,8 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import { Buffer } from "buffer";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useHistory, useParams } from "react-router";
 import { DecoderComponent } from "./Decoder";
 import fetchTx, { TxInfo } from "./utils/fetchTx";
 
@@ -77,14 +78,11 @@ function MessageInfo({ id }: { id: string }) {
 }
 
 export default function Transaction() {
-  const [txString, setTxString] = useState<string>("");
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const tx = params.get("tx");
-    if (tx) {
-      setTxString(decodeURIComponent(tx));
-    }
-  }, []);
+  const { replace } = useHistory();
+  const { hash } = useParams<{ hash?: string }>();
+  const txString = useMemo(() => {
+    return hash ? decodeURIComponent(hash) : "";
+  }, [hash]);
   const [infos, setInfos] = useState<TxInfo[] | null>(null);
   useEffect(() => {
     setInfos(null);
@@ -105,13 +103,13 @@ export default function Transaction() {
       cancelled = true;
     };
   }, [txString]);
-  const handleTxChange = useCallback((e: any) => {
-    const value: string = e.target.value.trim();
-    setTxString(value);
-    const params = new URLSearchParams();
-    params.set("tx", encodeURIComponent(value));
-    window.history.replaceState(undefined, "", `?${params.toString()}`);
-  }, []);
+  const handleTxChange = useCallback(
+    (e: any) => {
+      const value: string = e.target.value.trim();
+      replace(`/tx/${encodeURIComponent(value)}`);
+    },
+    [replace]
+  );
   return (
     <Grid container spacing={2}>
       <Grid xs={12} item>
