@@ -1,4 +1,4 @@
-import { ExpandMore } from "@mui/icons-material";
+import { CheckCircle, Error, ExpandMore } from "@mui/icons-material";
 import {
   Accordion,
   AccordionDetails,
@@ -50,7 +50,18 @@ function MessageInfo({ id }: { id: string }) {
   return (
     <Accordion sx={{ background: "rgba(255,255,255,0.05)" }}>
       <AccordionSummary expandIcon={<ExpandMore />}>
-        <Typography key={id}>{id}</Typography>
+        <Typography sx={{ mr: 1, display: "flex", alignItems: "center" }}>
+          {vaa === null ? (
+            <CircularProgress size={16} />
+          ) : !vaa ? (
+            <Error fontSize="inherit" />
+          ) : (
+            <CheckCircle fontSize="inherit" />
+          )}
+        </Typography>
+        <Typography key={id} sx={{ wordBreak: "break-all" }}>
+          {id}
+        </Typography>
       </AccordionSummary>
       <AccordionDetails>
         {vaa === null ? (
