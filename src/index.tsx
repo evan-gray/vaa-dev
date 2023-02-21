@@ -50,6 +50,11 @@ const theme = responsiveFontSizes(
           },
         },
       },
+      MuiInputBase: {
+        styleOverrides: {
+          input: { fontFamily: "monospace" },
+        },
+      },
     },
   })
 );
