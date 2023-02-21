@@ -16,9 +16,11 @@ import {
 } from "./sdk/tokenBridge";
 import { ParsedVaa, parseVaa } from "./sdk/wormhole";
 import chainIdToString from "./utils/chainIdToString";
+import { VaaIndexes, vaaToIndexes } from "./utils/vaaToIndexes";
 
 type ParsedVaaAndPayload = {
   vaa?: ParsedVaa;
+  vaaIndexes?: VaaIndexes;
   tokenBridge?: TokenTransfer;
 };
 
@@ -91,13 +93,14 @@ export function DecoderComponent({
         isHex ? "hex" : "base64"
       );
       const vaa = parseVaa(buf);
+      const vaaIndexes = vaaToIndexes(buf);
       let tokenBridge: TokenTransfer | undefined;
       try {
         tokenBridge = parseTokenTransferPayload(vaa.payload);
       } catch (e) {
         console.error(e);
       }
-      setParsed({ vaa, tokenBridge });
+      setParsed({ vaa, vaaIndexes, tokenBridge });
     } catch (e) {
       console.error(e);
     }
