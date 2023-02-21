@@ -1,6 +1,6 @@
 // Once the SDK is lighter weight, make some use here
 import axios from "axios";
-import { ChainId, coalesceChainName, CONTRACTS } from "./consts";
+import { ChainId, coalesceChainName, CONTRACTS } from "../sdk/consts";
 
 const RPCS_BY_CHAIN: { [id in ChainId]?: string } = {
   1: "https://api.mainnet-beta.solana.com",
