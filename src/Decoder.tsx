@@ -7,6 +7,7 @@ import {
   SxProps,
   TextField,
   Theme,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { Buffer } from "buffer";
@@ -24,6 +25,7 @@ import {
   VaaIndexes,
   vaaToIndexes,
 } from "./utils/vaaToIndexes";
+import { AccessTime } from "@mui/icons-material";
 
 type ParsedVaaAndPayload = {
   vaa?: ParsedVaa;
@@ -56,9 +58,10 @@ const vaaToString = (vaa: ParsedVaa, handleHover: (e: any) => void) =>
     `  version: ${vaa.version},`,
     `  guardianSetIndex: ${vaa.guardianSetIndex},`,
     `  guardianSignatures: (${vaa.guardianSignatures.length}),`,
-    `  timestamp: ${vaa.timestamp} (${new Date(
-      vaa.timestamp * 1000
-    ).toLocaleString()}),`,
+    `  timestamp: ${vaa.timestamp} (${new Date(vaa.timestamp * 1000)
+      .toISOString()
+      .replace("T", " ")
+      .replace(".000Z", " UTC")}),`,
     `  nonce: ${vaa.nonce},`,
     `  emitterChain: ${idToStr(vaa.emitterChain)},`,
     `  emitterAddress: ${vaa.emitterAddress.toString("hex")},`,
@@ -67,14 +70,23 @@ const vaaToString = (vaa: ParsedVaa, handleHover: (e: any) => void) =>
   ].map((s) => {
     const key = s.split(":")[0].trim();
     return (
-      <pre
+      <Box
         key={key}
         onMouseEnter={handleHover}
         onMouseLeave={handleHover}
         data-index={key}
+        position="relative"
       >
-        {s}
-      </pre>
+        <pre>{s}</pre>
+        {s.startsWith("  timestamp: ") ? (
+          <Tooltip title={new Date(vaa.timestamp * 1000).toLocaleString()}>
+            <AccessTime
+              fontSize="inherit"
+              sx={{ position: "absolute", left: 0, top: 4 }}
+            />
+          </Tooltip>
+        ) : null}
+      </Box>
     );
   });
 
