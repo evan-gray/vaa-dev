@@ -1,7 +1,6 @@
 // Adapted from https://github.com/wormhole-foundation/wormhole/blob/main/sdk/js/src/vaa/wormhole.ts
 import { Buffer } from "buffer";
-import { TokenBridgePayload } from "../sdk/tokenBridge";
-import { SignedVaa } from "../sdk/wormhole";
+import { TokenBridgePayload, SignedVaa } from "@certusone/wormhole-sdk" ;
 
 export type VaaIndexes = {
   [key: string]: [number, number] | undefined;

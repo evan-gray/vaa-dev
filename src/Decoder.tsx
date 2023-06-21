@@ -13,58 +13,28 @@ import {
 import { Buffer } from "buffer";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useHistory, useParams } from "react-router";
-import {
-  parseTokenTransferPayload,
-  TokenBridgePayload,
-  TokenTransfer,
-} from "./sdk/tokenBridge";
-import { ParsedVaa, parseVaa } from "./sdk/wormhole";
+import * as wh from '@certusone/wormhole-sdk';
 import chainIdToString from "./utils/chainIdToString";
-import {
-  tokenTransferPayloadToIndexes,
-  VaaIndexes,
-  vaaToIndexes,
-} from "./utils/vaaToIndexes";
 import { AccessTime } from "@mui/icons-material";
 
-type ParsedVaaAndPayload = {
-  vaa?: ParsedVaa;
-  vaaIndexes?: VaaIndexes;
-  tokenBridge?: TokenTransfer;
-  tokenBridgeIndexes?: VaaIndexes;
-};
 
 function idToStr(id: number): string {
   const s = chainIdToString(id);
   return s ? `${id} (${s})` : id.toString();
 }
 
-function transferTypeToString(
-  transferType:
-    | TokenBridgePayload.Transfer
-    | TokenBridgePayload.TransferWithPayload
-): string {
-  if (transferType === TokenBridgePayload.Transfer) {
-    return `${transferType} (Transfer)`;
-  }
-  if (transferType === TokenBridgePayload.TransferWithPayload) {
-    return `${transferType} (Transfer with Payload)`;
-  }
-  return transferType;
-}
-
-const vaaToString = (vaa: ParsedVaa, handleHover: (e: any) => void) =>
+const vaaToString = (vaa: wh.VAA<wh.Payload>, handleHover: (e: any) => void) =>
   [
     `  version: ${vaa.version},`,
     `  guardianSetIndex: ${vaa.guardianSetIndex},`,
-    `  guardianSignatures: (${vaa.guardianSignatures.length}),`,
+    `  guardianSignatures: (${vaa.signatures.length}),`,
     `  timestamp: ${vaa.timestamp} (${new Date(vaa.timestamp * 1000)
       .toISOString()
       .replace("T", " ")
       .replace(".000Z", " UTC")}),`,
     `  nonce: ${vaa.nonce},`,
     `  emitterChain: ${idToStr(vaa.emitterChain)},`,
-    `  emitterAddress: ${vaa.emitterAddress.toString("hex")},`,
+    `  emitterAddress: ${vaa.emitterAddress},`,
     `  sequence: ${vaa.sequence.toString()},`,
     `  consistencyLevel: ${vaa.consistencyLevel},`,
   ].map((s) => {
@@ -91,24 +61,22 @@ const vaaToString = (vaa: ParsedVaa, handleHover: (e: any) => void) =>
   });
 
 const tokenTransferToString = (
-  tokenTransfer: TokenTransfer,
+  tokenTransfer: wh.TokenBridgeTransfer | wh.TokenBridgeTransferWithPayload,
   handleHover: (e: any) => void
 ) =>
   [
-    `  payloadType: ${transferTypeToString(tokenTransfer.payloadType)},`,
+    `  payloadType: ${tokenTransfer.type},`,
     `  amount: ${tokenTransfer.amount.toString()},`,
     `  tokenChain: ${idToStr(tokenTransfer.tokenChain)},`,
-    `  tokenAddress: ${tokenTransfer.tokenAddress.toString("hex")},`,
-    `  toChain: ${idToStr(tokenTransfer.toChain)},`,
-    `  toAddress: ${tokenTransfer.to.toString("hex")},`,
-    ...(tokenTransfer.payloadType === TokenBridgePayload.Transfer
+    `  tokenAddress: ${tokenTransfer.tokenAddress},`,
+    `  toChain: ${idToStr(tokenTransfer.chain)},`,
+    `  toAddress: ${tokenTransfer.toAddress},`,
+    ...(tokenTransfer.type === "Transfer" 
       ? [`  fee: ${tokenTransfer.fee?.toString()},`]
-      : tokenTransfer.payloadType === TokenBridgePayload.TransferWithPayload
+      : tokenTransfer.type === "TransferWithPayload"
       ? [
-          `  fromAddress: ${tokenTransfer.fromAddress?.toString("hex")},`,
-          `  tokenTransferPayload: ${tokenTransfer.tokenTransferPayload.toString(
-            "hex"
-          )}`,
+          `  fromAddress: ${tokenTransfer.fromAddress},`,
+          `  tokenTransferPayload: ${tokenTransfer.payload}`,
         ]
       : []),
   ].map((s) => {
@@ -124,6 +92,35 @@ const tokenTransferToString = (
       </pre>
     );
   });
+
+const nftTransferToString = (
+  nftTransfer: wh.NFTBridgeTransfer,
+  handleHover: (e: any) => void
+) =>
+  [
+    `  payloadType: ${nftTransfer.type},`,
+    `  tokenChain: ${idToStr(nftTransfer.tokenChain)},`,
+    `  tokenAddress: ${nftTransfer.tokenAddress},`,
+    `  tokenSymbol: ${nftTransfer.tokenSymbol},`,
+    `  tokenName: ${nftTransfer.tokenName},`,
+    `  tokenId: ${nftTransfer.tokenId},`,
+    `  tokenURI: ${nftTransfer.tokenURI},`,
+    `  toChain: ${idToStr(nftTransfer.chain)},`,
+    `  toAddress: ${nftTransfer.toAddress},`,
+  ].map((s) => {
+    const key = s.split(":")[0].trim();
+    return (
+      <pre
+        key={key}
+        onMouseEnter={handleHover}
+        onMouseLeave={handleHover}
+        data-index={`payload-${key}`}
+      >
+        {s}
+      </pre>
+    );
+  });
+
 
 const highlightColor = "rgba(255,255,0,0.2)";
 
@@ -143,9 +140,9 @@ export function DecoderComponent({
   handleHexChange?: (e: any) => void;
 }) {
   const inputRef = useRef<any>();
-  const [parsed, setParsed] = useState<ParsedVaaAndPayload | null>(null);
+  const [vaa, setVaa] = useState<wh.VAA<wh.Payload> | null>(null);
   useEffect(() => {
-    setParsed(null);
+    setVaa(null);
     if (!vaaString) return;
     try {
       const isHex = /^(0[xX])?[A-Fa-f0-9]+$/.test(vaaString);
@@ -154,48 +151,44 @@ export function DecoderComponent({
         hasPrefix ? vaaString.slice(2) : vaaString,
         isHex ? "hex" : "base64"
       );
-      const vaa = parseVaa(buf);
-      const vaaIndexes = vaaToIndexes(buf);
-      let tokenBridge: TokenTransfer | undefined;
-      let tokenBridgeIndexes: VaaIndexes | undefined;
-      try {
-        tokenBridge = parseTokenTransferPayload(vaa.payload);
-        tokenBridgeIndexes = tokenTransferPayloadToIndexes(vaa.payload);
-      } catch (e) {
-        console.error(e);
-      }
-      setParsed({ vaa, vaaIndexes, tokenBridge, tokenBridgeIndexes });
+      const vaa = wh.parse(buf);
+      if(vaa.payload.type === "Other") return;
+      setVaa(vaa as wh.VAA<wh.Payload>)
     } catch (e) {
       console.error(e);
     }
   }, [vaaString]);
-  const [hoverIndex, setHoverIndex] = useState<string | null>(null);
+
+  // const [hoverIndex, setHoverIndex] = useState<string | null>(null);
   const handleHover = useCallback((e: any) => {
-    if (e.type === "mouseenter") {
-      setHoverIndex(e.target.dataset.index);
-    } else {
-      setHoverIndex(null);
-    }
+    //if (e.type === "mouseenter") {
+    //  setHoverIndex(e.target.dataset.index);
+    //} else {
+    //  setHoverIndex(null);
+    //}
   }, []);
-  useEffect(() => {
-    const isHex = /^(0[xX])?[A-Fa-f0-9]+$/.test(vaaString);
-    if (inputRef.current) {
-      const indexes =
-        hoverIndex &&
-        (hoverIndex.startsWith("payload-")
-          ? parsed?.tokenBridgeIndexes?.[hoverIndex.substring(8)]?.map(
-              (n) => n + (parsed?.vaaIndexes?.payload?.[0] || 0)
-            )
-          : parsed?.vaaIndexes?.[hoverIndex]);
-      if (isHex && indexes) {
-        inputRef.current.selectionStart = indexes[0] * 2;
-        inputRef.current.selectionEnd = indexes[1] * 2;
-      } else {
-        inputRef.current.selectionStart = inputRef.current.selectionEnd;
-        inputRef.current.blur();
-      }
-    }
-  }, [vaaString, hoverIndex, parsed]);
+
+  // TODO: punting
+  // useEffect(() => {
+  //   const isHex = /^(0[xX])?[A-Fa-f0-9]+$/.test(vaaString);
+  //   if (inputRef.current) {
+  //     const indexes =
+  //       hoverIndex &&
+  //       (hoverIndex.startsWith("payload-")
+  //         ? parsed?.tokenBridgeIndexes?.[hoverIndex.substring(8)]?.map(
+  //             (n) => n + (parsed?.vaaIndexes?.payload?.[0] || 0)
+  //           )
+  //         : parsed?.vaaIndexes?.[hoverIndex]);
+  //     if (isHex && indexes) {
+  //       inputRef.current.selectionStart = indexes[0] * 2;
+  //       inputRef.current.selectionEnd = indexes[1] * 2;
+  //     } else {
+  //       inputRef.current.selectionStart = inputRef.current.selectionEnd;
+  //       inputRef.current.blur();
+  //     }
+  //   }
+  // }, [vaaString, hoverIndex, vaa]);
+
   return (
     <Grid container spacing={2}>
       <Grid xs={12} md={6} item>
@@ -222,35 +215,34 @@ export function DecoderComponent({
         <Card sx={{ height: "100%" }}>
           <CardHeader title="Decoded" />
           <CardContent>
-            {parsed?.vaa ? (
+            {vaa ? (
               <>
                 <Typography variant="h6" gutterBottom>
                   Header
                 </Typography>
                 <Box sx={preBoxStyle}>
                   <pre style={{ pointerEvents: "none" }}>{"{"}</pre>
-                  {vaaToString(parsed.vaa, handleHover)}
+                  {vaaToString(vaa, handleHover)}
                   <pre style={{ pointerEvents: "none" }}>{"}"}</pre>
                 </Box>
                 <Typography variant="h6" mt={4} gutterBottom>
                   Payload
                 </Typography>
-                {parsed.tokenBridge ? (
+                {
+                vaa.payload.module === "TokenBridge" && vaa.payload.type === "Transfer" ? (
                   <Box sx={preBoxStyle}>
                     <pre style={{ pointerEvents: "none" }}>{"{"}</pre>
-                    {tokenTransferToString(parsed.tokenBridge, handleHover)}
+                    {tokenTransferToString(vaa.payload, handleHover)}
                     <pre style={{ pointerEvents: "none" }}>{"}"}</pre>
                   </Box>
-                ) : (
-                  <code
-                    style={{ wordBreak: "break-all" }}
-                    onMouseEnter={handleHover}
-                    onMouseLeave={handleHover}
-                    data-index="payload"
-                  >
-                    {parsed.vaa.payload.toString("hex")}
-                  </code>
-                )}
+                ) : vaa.payload.module === "NFTBridge" && vaa.payload.type === "Transfer" ? (
+                  <Box sx={preBoxStyle}>
+                    <pre style={{ pointerEvents: "none" }}>{"{"}</pre>
+                    {nftTransferToString(vaa.payload, handleHover)}
+                    <pre style={{ pointerEvents: "none" }}>{"}"}</pre>
+                  </Box>
+                ): (<Box><pre>{vaa.payload.module}</pre></Box>)
+                }
               </>
             ) : null}
           </CardContent>
