@@ -84,7 +84,11 @@ function MessageInfo({ id, env }: { id: string; env: Env }) {
           "Not found"
         ) : (
           <>
-            <DecoderComponent vaaString={vaa} showEncoded={showEncoded} />
+            <DecoderComponent
+              vaaString={vaa}
+              showEncoded={showEncoded}
+              env={env}
+            />
             <Button onClick={handleToggleEncoded} sx={{ mt: 1 }}>
               {showEncoded ? "Hide" : "Show"} Encoded
             </Button>

@@ -40,6 +40,7 @@ import {
   tokenTransferPayloadToIndexes,
   vaaToIndexes,
 } from "./utils/vaaToIndexes";
+import { Env } from "./utils/fetchTx";
 
 type ParsedVaaAndPayload = {
   vaa?: ParsedVaa;
@@ -168,10 +169,12 @@ export function DecoderComponent({
   vaaString,
   handleHexChange,
   showEncoded = true,
+  env = "MAINNET",
 }: {
   vaaString: string;
   handleHexChange?: (e: any) => void;
   showEncoded?: boolean;
+  env?: Env;
 }) {
   const inputRef = useRef<any>();
   const [parsed, setParsed] = useState<ParsedVaaAndPayload | null>(null);
@@ -189,12 +192,12 @@ export function DecoderComponent({
       const vaaIndexes = vaaToIndexes(buf);
       const emitterAddress = vaa.emitterAddress.toString("hex").toLowerCase();
       const isTokenBridgeEmitter =
-        KNOWN_TOKEN_BRIDGE_EMITTERS.mainnet[vaa.emitterChain].toLowerCase() ===
+        KNOWN_TOKEN_BRIDGE_EMITTERS[env][vaa.emitterChain]?.toLowerCase() ===
         emitterAddress;
       const isAutomaticRelayerEmitter =
-        KNOWN_AUTOMATIC_RELAYER_EMITTERS.mainnet[
+        KNOWN_AUTOMATIC_RELAYER_EMITTERS[env][
           vaa.emitterChain
-        ].toLowerCase() === emitterAddress;
+        ]?.toLowerCase() === emitterAddress;
       let tokenBridge: TokenTransfer | undefined;
       let tokenBridgeIndexes: VaaIndexes | undefined;
       let automaticRelay:
@@ -239,7 +242,7 @@ export function DecoderComponent({
     } catch (e) {
       console.error(e);
     }
-  }, [vaaString]);
+  }, [vaaString, env]);
   const [hoverIndex, setHoverIndex] = useState<string | null>(null);
   const handleHover = useCallback((e: any) => {
     if (e.type === "mouseenter") {

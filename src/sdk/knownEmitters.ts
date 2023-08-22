@@ -28,10 +28,10 @@ import {
 } from "./consts";
 
 export const KNOWN_TOKEN_BRIDGE_EMITTERS: {
-  mainnet: { [chainId: number]: string };
-  testnet: { [chainId: number]: string };
+  MAINNET: { [chainId: number]: string };
+  TESTNET: { [chainId: number]: string };
 } = {
-  mainnet: {
+  MAINNET: {
     [CHAIN_ID_SOLANA]:
       "ec7372995d5cc8732397fb0ad35c0121e0eaa90d26f828a534cab54391b3a4f5",
     [CHAIN_ID_ETH]:
@@ -85,14 +85,14 @@ export const KNOWN_TOKEN_BRIDGE_EMITTERS: {
     [CHAIN_ID_WORMCHAIN]:
       "aeb534c45c3049d380b9d9b966f9895f53abd4301bfaff407fa09dea8ae7a924",
   },
-  testnet: {},
+  TESTNET: {},
 };
 
 export const KNOWN_AUTOMATIC_RELAYER_EMITTERS: {
-  mainnet: { [chainId: number]: string };
-  testnet: { [chainId: number]: string };
+  MAINNET: { [chainId: number]: string };
+  TESTNET: { [chainId: number]: string };
 } = {
-  mainnet: {
+  MAINNET: {
     [CHAIN_ID_ETH]:
       "00000000000000000000000027428DD2d3DD32A4D7f7C497eAaa23130d894911",
     [CHAIN_ID_BSC]:
@@ -120,7 +120,7 @@ export const KNOWN_AUTOMATIC_RELAYER_EMITTERS: {
     [CHAIN_ID_BASE]:
       "00000000000000000000000027428DD2d3DD32A4D7f7C497eAaa23130d894911",
   },
-  testnet: {
+  TESTNET: {
     [CHAIN_ID_BSC]:
       "00000000000000000000000080aC94316391752A193C1c47E27D382b507c93F3",
     [CHAIN_ID_POLYGON]:
