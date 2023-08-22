@@ -4,6 +4,7 @@ import {
   Card,
   CardContent,
   CardHeader,
+  CircularProgress,
   Grid,
   SxProps,
   TextField,
@@ -41,6 +42,12 @@ import {
   vaaToIndexes,
 } from "./utils/vaaToIndexes";
 import { Env } from "./utils/fetchTx";
+import axios from "axios";
+
+const MAINNET_RELAY_STATUS =
+  "https://nextjs-cors-anywhere.vercel.app/api?endpoint=http://ade18dde9976749fca82c41f05d29cbe-364125254.us-east-2.elb.amazonaws.com/relay-status";
+const TESTNET_RELAY_STATUS =
+  "https://nextjs-cors-anywhere.vercel.app/api?endpoint=http://a6163c82a2a6f4c1d9c2cf2c35f0733b-758274193.us-east-2.elb.amazonaws.com/relay-status";
 
 type ParsedVaaAndPayload = {
   vaa?: ParsedVaa;
@@ -165,11 +172,69 @@ const preBoxStyle: SxProps<Theme> = {
   },
 };
 
+function RelayStatus({
+  chain,
+  emitter,
+  seq,
+  env,
+  preBoxStyle,
+}: {
+  chain: number;
+  emitter: string;
+  seq: string;
+  env?: Env;
+  preBoxStyle: any;
+}) {
+  const [resultString, setResultString] = useState<string | null>(null);
+  useEffect(() => {
+    if (!env) {
+      setResultString("");
+      return;
+    }
+    let cancelled = false;
+    setResultString(null);
+    (async () => {
+      const vaaUrl = `${
+        env === "MAINNET" ? MAINNET_RELAY_STATUS : TESTNET_RELAY_STATUS
+      }?emitterChain=${chain}&emitterAddress=${emitter}&sequence=${seq}`;
+      try {
+        const response = await axios.get(vaaUrl);
+        console.log(
+          response?.data?.[0]?.metadata?.deliveryRecord?.resultString
+        );
+        if (
+          !cancelled &&
+          response?.data?.[0]?.metadata?.deliveryRecord?.resultString
+        ) {
+          setResultString(
+            response?.data?.[0]?.metadata?.deliveryRecord?.resultString
+          );
+          return;
+        }
+      } catch (e) {
+        setResultString("");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [chain, emitter, seq, env]);
+  return resultString === null ? (
+    <CircularProgress />
+  ) : (
+    <Box sx={preBoxStyle}>
+      <pre style={{ pointerEvents: "none" }}>
+        {resultString || "No information available"}
+      </pre>
+    </Box>
+  );
+}
+
 export function DecoderComponent({
   vaaString,
   handleHexChange,
   showEncoded = true,
-  env = "MAINNET",
+  env,
 }: {
   vaaString: string;
   handleHexChange?: (e: any) => void;
@@ -182,6 +247,7 @@ export function DecoderComponent({
     setParsed(null);
     if (!vaaString) return;
     try {
+      const emitterEnv = env || "MAINNET";
       const isHex = /^(0[xX])?[A-Fa-f0-9]+$/.test(vaaString);
       const hasPrefix = isHex && vaaString.toLowerCase().startsWith("0x");
       const buf = Buffer.from(
@@ -192,10 +258,11 @@ export function DecoderComponent({
       const vaaIndexes = vaaToIndexes(buf);
       const emitterAddress = vaa.emitterAddress.toString("hex").toLowerCase();
       const isTokenBridgeEmitter =
-        KNOWN_TOKEN_BRIDGE_EMITTERS[env][vaa.emitterChain]?.toLowerCase() ===
-        emitterAddress;
+        KNOWN_TOKEN_BRIDGE_EMITTERS[emitterEnv][
+          vaa.emitterChain
+        ]?.toLowerCase() === emitterAddress;
       const isAutomaticRelayerEmitter =
-        KNOWN_AUTOMATIC_RELAYER_EMITTERS[env][
+        KNOWN_AUTOMATIC_RELAYER_EMITTERS[emitterEnv][
           vaa.emitterChain
         ]?.toLowerCase() === emitterAddress;
       let tokenBridge: TokenTransfer | undefined;
@@ -333,6 +400,20 @@ export function DecoderComponent({
                     {parsed.vaa.payload.toString("hex")}
                   </code>
                 )}
+                {parsed.vaa && parsed.automaticRelay ? (
+                  <>
+                    <Typography variant="h6" mt={4} gutterBottom>
+                      Result
+                    </Typography>
+                    <RelayStatus
+                      chain={parsed.vaa.emitterChain}
+                      emitter={parsed.vaa.emitterAddress.toString("hex")}
+                      seq={parsed.vaa.sequence.toString()}
+                      env={env}
+                      preBoxStyle={preBoxStyle}
+                    />
+                  </>
+                ) : null}
               </>
             ) : null}
           </CardContent>
