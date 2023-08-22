@@ -24,6 +24,7 @@ const RPCS_BY_CHAIN: { [id in ChainId]?: string } = {
   23: "https://rpc.ankr.com/arbitrum",
   24: "https://rpc.ankr.com/optimism",
   28: "https://dimension-lcd.xpla.dev",
+  30: "https://mainnet.base.org",
 };
 
 function isEVMChain(id: number) {
@@ -40,7 +41,8 @@ function isEVMChain(id: number) {
     id === 14 ||
     id === 16 ||
     id === 23 ||
-    id === 24
+    id === 24 ||
+    id === 30
   );
 }
 

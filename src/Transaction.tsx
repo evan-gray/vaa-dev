@@ -118,7 +118,7 @@ export default function Transaction() {
           <CardContent>
             <TextField
               placeholder={
-                "Paste a transaction hash from any EVM chain (more support coming soon!)"
+                "Paste a transaction hash from any Wormhole EVM chain"
               }
               fullWidth
               value={txString}
