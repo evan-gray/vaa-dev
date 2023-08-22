@@ -58,8 +58,8 @@ function App() {
           <Typography variant="h6" component="div" sx={{ mr: 1 }}>
             VAA Tools
           </Typography>
-          <NavButton to="/" label="Parse" exact />
-          <NavButton to="/tx" label="Fetch" exact />
+          <NavButton to="/tx" label="Fetch" />
+          <NavButton to="/parse" label="Parse" />
           <Box sx={{ flexGrow: 1 }} />
           <IconButton
             href="https://github.com/evan-gray/vaa-dev"
@@ -80,7 +80,7 @@ function App() {
             <Transaction />
           </Route>
           <Route>
-            <Redirect to="/parse" />
+            <Redirect to="/tx" />
           </Route>
         </Switch>
       </Box>
