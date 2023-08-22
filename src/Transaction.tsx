@@ -3,6 +3,7 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
+  Button,
   Card,
   CardContent,
   CardHeader,
@@ -16,9 +17,9 @@ import { Buffer } from "buffer";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useHistory, useParams } from "react-router";
 import { DecoderComponent } from "./Decoder";
-import fetchTx, { TxInfo } from "./utils/fetchTx";
+import fetchTx, { Env, TxInfo } from "./utils/fetchTx";
 
-const RPCS = [
+const MAINNET_RPCS = [
   "https://wormhole-v2-mainnet-api.certus.one",
   "https://wormhole.inotel.ro",
   "https://wormhole-v2-mainnet-api.mcf.rocks",
@@ -27,13 +28,23 @@ const RPCS = [
   "https://wormhole-v2-mainnet.01node.com",
 ];
 
-function MessageInfo({ id }: { id: string }) {
+const TESTNET_RPCS = ["https://wormhole-v2-testnet-api.certus.one"];
+
+function MessageInfo({ id, env }: { id: string; env: Env }) {
   const [vaa, setVaa] = useState<null | string>(null);
+  const [showEncoded, setShowEncoded] = useState<boolean>(false);
+  const handleToggleEncoded = useCallback(() => {
+    setShowEncoded((s) => !s);
+  }, []);
   useEffect(() => {
     const [chain, emitter, sequence] = id.split("/");
     let cancelled = false;
     (async () => {
-      for (const rpc of RPCS) {
+      for (const rpc of env === "MAINNET"
+        ? MAINNET_RPCS
+        : env === "TESTNET"
+        ? TESTNET_RPCS
+        : []) {
         if (cancelled) return;
         const vaaUrl = `${rpc}/v1/signed_vaa/${chain}/${emitter}/${sequence}`;
         const response = await axios.get(vaaUrl);
@@ -47,9 +58,9 @@ function MessageInfo({ id }: { id: string }) {
     return () => {
       cancelled = true;
     };
-  }, [id]);
+  }, [id, env]);
   return (
-    <Accordion sx={{ background: "rgba(255,255,255,0.05)" }}>
+    <Accordion defaultExpanded sx={{ background: "rgba(255,255,255,0.05)" }}>
       <AccordionSummary expandIcon={<ExpandMore />}>
         <Typography sx={{ mr: 1, display: "flex", alignItems: "center" }}>
           {vaa === null ? (
@@ -63,6 +74,8 @@ function MessageInfo({ id }: { id: string }) {
         <Typography key={id} sx={{ wordBreak: "break-all" }}>
           {id}
         </Typography>
+        &nbsp;
+        <Typography>{env.toLowerCase()}</Typography>
       </AccordionSummary>
       <AccordionDetails>
         {vaa === null ? (
@@ -70,7 +83,12 @@ function MessageInfo({ id }: { id: string }) {
         ) : !vaa ? (
           "Not found"
         ) : (
-          <DecoderComponent vaaString={vaa} />
+          <>
+            <DecoderComponent vaaString={vaa} showEncoded={showEncoded} />
+            <Button onClick={handleToggleEncoded} sx={{ mt: 1 }}>
+              {showEncoded ? "Hide" : "Show"} Encoded
+            </Button>
+          </>
         )}
       </AccordionDetails>
     </Accordion>
@@ -92,7 +110,6 @@ export default function Transaction() {
       try {
         const txInfos = await fetchTx(txString);
         if (!cancelled) {
-          console.log(txInfos);
           setInfos(txInfos);
         }
       } catch (e) {
@@ -136,7 +153,13 @@ export default function Transaction() {
             ) : infos ? (
               infos.length ? (
                 infos.map((info) =>
-                  info.messageIds.map((id) => <MessageInfo key={id} id={id} />)
+                  info.messageIds.map((id) => (
+                    <MessageInfo
+                      key={`${info.env}-${id}`}
+                      id={id}
+                      env={info.env}
+                    />
+                  ))
                 )
               ) : (
                 <Typography>No messages found</Typography>

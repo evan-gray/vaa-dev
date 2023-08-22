@@ -1,3 +1,4 @@
+import { AccessTime, CheckCircleOutlined } from "@mui/icons-material";
 import {
   Box,
   Card,
@@ -14,24 +15,41 @@ import { Buffer } from "buffer";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useHistory, useParams } from "react-router";
 import {
-  parseTokenTransferPayload,
+  DeliveryInstructionPrintable,
+  RedeliveryInstructionPrintable,
+  RelayerPayloadId,
+  deliveryInstructionsPrintable,
+  parseWormholeRelayerPayloadType,
+  parseWormholeRelayerResend,
+  parseWormholeRelayerSend,
+  redeliveryInstructionPrintable,
+} from "./sdk/automaticRelayerStructs";
+import {
+  KNOWN_AUTOMATIC_RELAYER_EMITTERS,
+  KNOWN_TOKEN_BRIDGE_EMITTERS,
+} from "./sdk/knownEmitters";
+import {
   TokenBridgePayload,
   TokenTransfer,
+  parseTokenTransferPayload,
 } from "./sdk/tokenBridge";
 import { ParsedVaa, parseVaa } from "./sdk/wormhole";
 import chainIdToString from "./utils/chainIdToString";
 import {
-  tokenTransferPayloadToIndexes,
   VaaIndexes,
+  tokenTransferPayloadToIndexes,
   vaaToIndexes,
 } from "./utils/vaaToIndexes";
-import { AccessTime } from "@mui/icons-material";
 
 type ParsedVaaAndPayload = {
   vaa?: ParsedVaa;
   vaaIndexes?: VaaIndexes;
   tokenBridge?: TokenTransfer;
   tokenBridgeIndexes?: VaaIndexes;
+  automaticRelay?:
+    | DeliveryInstructionPrintable
+    | RedeliveryInstructionPrintable;
+  knownEmitter?: string;
 };
 
 function idToStr(id: number): string {
@@ -53,7 +71,11 @@ function transferTypeToString(
   return transferType;
 }
 
-const vaaToString = (vaa: ParsedVaa, handleHover: (e: any) => void) =>
+const vaaToString = (
+  vaa: ParsedVaa,
+  knownEmitter: string | undefined,
+  handleHover: (e: any) => void
+) =>
   [
     `  version: ${vaa.version},`,
     `  guardianSetIndex: ${vaa.guardianSetIndex},`,
@@ -81,6 +103,13 @@ const vaaToString = (vaa: ParsedVaa, handleHover: (e: any) => void) =>
         {s.startsWith("  timestamp: ") ? (
           <Tooltip title={new Date(vaa.timestamp * 1000).toLocaleString()}>
             <AccessTime
+              fontSize="inherit"
+              sx={{ position: "absolute", left: 0, top: 4 }}
+            />
+          </Tooltip>
+        ) : s.startsWith("  emitterAddress: ") && knownEmitter ? (
+          <Tooltip title={`Known ${knownEmitter} Emitter`}>
+            <CheckCircleOutlined
               fontSize="inherit"
               sx={{ position: "absolute", left: 0, top: 4 }}
             />
@@ -138,9 +167,11 @@ const preBoxStyle: SxProps<Theme> = {
 export function DecoderComponent({
   vaaString,
   handleHexChange,
+  showEncoded = true,
 }: {
   vaaString: string;
   handleHexChange?: (e: any) => void;
+  showEncoded?: boolean;
 }) {
   const inputRef = useRef<any>();
   const [parsed, setParsed] = useState<ParsedVaaAndPayload | null>(null);
@@ -156,15 +187,55 @@ export function DecoderComponent({
       );
       const vaa = parseVaa(buf);
       const vaaIndexes = vaaToIndexes(buf);
+      const emitterAddress = vaa.emitterAddress.toString("hex").toLowerCase();
+      const isTokenBridgeEmitter =
+        KNOWN_TOKEN_BRIDGE_EMITTERS.mainnet[vaa.emitterChain].toLowerCase() ===
+        emitterAddress;
+      const isAutomaticRelayerEmitter =
+        KNOWN_AUTOMATIC_RELAYER_EMITTERS.mainnet[
+          vaa.emitterChain
+        ].toLowerCase() === emitterAddress;
       let tokenBridge: TokenTransfer | undefined;
       let tokenBridgeIndexes: VaaIndexes | undefined;
-      try {
-        tokenBridge = parseTokenTransferPayload(vaa.payload);
-        tokenBridgeIndexes = tokenTransferPayloadToIndexes(vaa.payload);
-      } catch (e) {
-        console.error(e);
+      let automaticRelay:
+        | DeliveryInstructionPrintable
+        | RedeliveryInstructionPrintable
+        | undefined;
+      if (isTokenBridgeEmitter) {
+        try {
+          tokenBridge = parseTokenTransferPayload(vaa.payload);
+          tokenBridgeIndexes = tokenTransferPayloadToIndexes(vaa.payload);
+        } catch (e) {
+          console.error(e);
+        }
+      } else if (isAutomaticRelayerEmitter) {
+        try {
+          const type = parseWormholeRelayerPayloadType(vaa.payload);
+          if (type === RelayerPayloadId.Delivery) {
+            automaticRelay = deliveryInstructionsPrintable(
+              parseWormholeRelayerSend(vaa.payload)
+            );
+          } else if (type === RelayerPayloadId.Redelivery) {
+            automaticRelay = redeliveryInstructionPrintable(
+              parseWormholeRelayerResend(vaa.payload)
+            );
+          }
+        } catch (e) {
+          console.error(e);
+        }
       }
-      setParsed({ vaa, vaaIndexes, tokenBridge, tokenBridgeIndexes });
+      setParsed({
+        vaa,
+        vaaIndexes,
+        tokenBridge,
+        tokenBridgeIndexes,
+        automaticRelay,
+        knownEmitter: isTokenBridgeEmitter
+          ? "Token Bridge"
+          : isAutomaticRelayerEmitter
+          ? "Automatic Relayer"
+          : undefined,
+      });
     } catch (e) {
       console.error(e);
     }
@@ -198,27 +269,29 @@ export function DecoderComponent({
   }, [vaaString, hoverIndex, parsed]);
   return (
     <Grid container spacing={2}>
-      <Grid xs={12} md={6} item>
-        <Card sx={{ height: "100%" }}>
-          <CardHeader title="Encoded" />
-          <CardContent>
-            <TextField
-              multiline
-              rows={20}
-              placeholder={
-                "Paste a VAA in base64 or hex (with or without prefix)"
-              }
-              fullWidth
-              value={vaaString}
-              onChange={handleHexChange}
-              disabled={!handleHexChange}
-              inputRef={inputRef}
-              sx={{ "& ::selection": { background: highlightColor } }}
-            />
-          </CardContent>
-        </Card>
-      </Grid>
-      <Grid xs={12} md={6} item>
+      {showEncoded ? (
+        <Grid xs={12} md={6} item>
+          <Card sx={{ height: "100%" }}>
+            <CardHeader title="Encoded" />
+            <CardContent>
+              <TextField
+                multiline
+                rows={20}
+                placeholder={
+                  "Paste a VAA in base64 or hex (with or without prefix)"
+                }
+                fullWidth
+                value={vaaString}
+                onChange={handleHexChange}
+                disabled={!handleHexChange}
+                inputRef={inputRef}
+                sx={{ "& ::selection": { background: highlightColor } }}
+              />
+            </CardContent>
+          </Card>
+        </Grid>
+      ) : null}
+      <Grid xs={12} md={showEncoded ? 6 : 12} item>
         <Card sx={{ height: "100%" }}>
           <CardHeader title="Decoded" />
           <CardContent>
@@ -229,7 +302,7 @@ export function DecoderComponent({
                 </Typography>
                 <Box sx={preBoxStyle}>
                   <pre style={{ pointerEvents: "none" }}>{"{"}</pre>
-                  {vaaToString(parsed.vaa, handleHover)}
+                  {vaaToString(parsed.vaa, parsed.knownEmitter, handleHover)}
                   <pre style={{ pointerEvents: "none" }}>{"}"}</pre>
                 </Box>
                 <Typography variant="h6" mt={4} gutterBottom>
@@ -240,6 +313,12 @@ export function DecoderComponent({
                     <pre style={{ pointerEvents: "none" }}>{"{"}</pre>
                     {tokenTransferToString(parsed.tokenBridge, handleHover)}
                     <pre style={{ pointerEvents: "none" }}>{"}"}</pre>
+                  </Box>
+                ) : parsed.automaticRelay ? (
+                  <Box sx={preBoxStyle}>
+                    <pre style={{ pointerEvents: "none" }}>
+                      {JSON.stringify(parsed.automaticRelay, undefined, 2)}
+                    </pre>
                   </Box>
                 ) : (
                   <code
