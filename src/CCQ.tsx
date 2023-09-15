@@ -33,6 +33,7 @@ import { sleep } from "./utils/sleep";
 import { Launch } from "@mui/icons-material";
 import { QueryDemo } from "./utils/contracts/QueryDemo";
 import chainIdToString from "./utils/chainIdToString";
+import { METAMASK_CHAIN_PARAMETERS } from "./utils/metaMaskChainParameters";
 
 const CONTRACTS = [
   {
@@ -252,9 +253,32 @@ export default function CCQ() {
           );
           const connectedChainId = (await provider.getNetwork()).chainId;
           if (connectedChainId !== requiredEvmChainId) {
-            await provider.send("wallet_switchEthereumChain", [
-              { chainId: `0x${requiredEvmChainId.toString(16)}` },
-            ]);
+            try {
+              await provider.send("wallet_switchEthereumChain", [
+                { chainId: `0x${requiredEvmChainId.toString(16)}` },
+              ]);
+            } catch (switchError: any) {
+              console.log(switchError);
+              const addChainParameter =
+                METAMASK_CHAIN_PARAMETERS[requiredEvmChainId];
+              console.log(addChainParameter);
+              // This error code indicates that the chain has not been added to MetaMask.
+              if (
+                switchError.code === 4902 &&
+                addChainParameter !== undefined
+              ) {
+                await provider.send("wallet_addEthereumChain", [
+                  addChainParameter,
+                ]);
+                // user may cancel the chain switch prompt after adding
+                const connectedChainId = (await provider.getNetwork()).chainId;
+                if (connectedChainId !== requiredEvmChainId) {
+                  throw new Error("User rejected the request.");
+                }
+              } else {
+                throw switchError;
+              }
+            }
           }
           const contract = QueryDemo__factory.connect(
             address,
