@@ -5,6 +5,7 @@ import {
   ThemeProvider,
 } from "@mui/material";
 import { grey } from "@mui/material/colors";
+import { SnackbarProvider } from "notistack";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { HashRouter as Router } from "react-router-dom";
@@ -63,7 +64,9 @@ root.render(
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
-        <App />
+        <SnackbarProvider>
+          <App />
+        </SnackbarProvider>
       </Router>
     </ThemeProvider>
   </React.StrictMode>

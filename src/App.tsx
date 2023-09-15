@@ -14,6 +14,7 @@ import {
   Switch,
   useRouteMatch,
 } from "react-router-dom";
+import CCQ from "./CCQ";
 import Decoder from "./Decoder";
 import Transaction from "./Transaction";
 
@@ -60,6 +61,7 @@ function App() {
           </Typography>
           <NavButton to="/tx" label="Fetch" />
           <NavButton to="/parse" label="Parse" />
+          <NavButton to="/ccq" label="CCQ" />
           <Box sx={{ flexGrow: 1 }} />
           <IconButton
             href="https://github.com/evan-gray/vaa-dev"
@@ -78,6 +80,9 @@ function App() {
           </Route>
           <Route exact path={["/tx", "/tx/:hash"]}>
             <Transaction />
+          </Route>
+          <Route exact path={["/ccq"]}>
+            <CCQ />
           </Route>
           <Route>
             <Redirect to="/tx" />
