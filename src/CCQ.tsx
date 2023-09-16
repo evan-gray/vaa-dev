@@ -40,7 +40,7 @@ const CONTRACTS = [
     chainId: CHAIN_ID_POLYGON,
     evmId: 80001,
     name: "Polygon Mumbai",
-    address: "0xCAB985A8d94f3f13a7aC003AcdF43C46314352c1",
+    address: "0x130Db1B83d205562461eD0720B37f1FBC21Bf67F",
     backgroundColor: "#DDA0DD20",
     rpc: "https://rpc-mumbai.maticvigil.com", //TESTNET_RPCS_BY_CHAIN[CHAIN_ID_POLYGON],
     explorer: "https://mumbai.polygonscan.com",
@@ -49,7 +49,7 @@ const CONTRACTS = [
     chainId: CHAIN_ID_ARBITRUM,
     evmId: 421613,
     name: "Arbitrum Goerli",
-    address: "0x3ce792601c936b1c81f73Ea2fa77208C0A478BaE",
+    address: "0x6E36177f26A3C9cD2CE8DDF1b12904fe36deA47F",
     backgroundColor: "#B0E0E620",
     rpc: TESTNET_RPCS_BY_CHAIN[CHAIN_ID_ARBITRUM],
     explorer: "https://goerli.arbiscan.io",
@@ -58,7 +58,7 @@ const CONTRACTS = [
     chainId: CHAIN_ID_OPTIMISM,
     evmId: 420,
     name: "Optimism Goerli",
-    address: "0x5b00016d13Dd099d435310729E51C68F86f05bd7",
+    address: "0x4A74b06f075D17fe91690719Eb285687AEcE5748",
     backgroundColor: "#FF000020",
     rpc: "https://goerli.optimism.io", //TESTNET_RPCS_BY_CHAIN[CHAIN_ID_OPTIMISM],
     explorer: "https://goerli-optimism.etherscan.io",
@@ -121,15 +121,11 @@ function ContractState({
             <Typography>
               Chain ID: {chainIdToString(d.chainID)} ({d.chainID.toString()})
             </Typography>
-            {chainId === d.chainID ? null : (
-              <>
-                <Typography>Block Number: {d.blockNum.toString()}</Typography>
-                <Typography>
-                  Block Time:{" "}
-                  {new Date(d.blockTime.toNumber() / 1000).toLocaleString()}
-                </Typography>
-              </>
-            )}
+            <Typography>Block Number: {d.blockNum.toString()}</Typography>
+            <Typography>
+              Block Time:{" "}
+              {new Date(d.blockTime.toNumber() * 1000).toLocaleString()}
+            </Typography>
             <Typography>Contract: {d.contractAddress}</Typography>
             <Typography>Count: {d.counter.toString()}</Typography>
           </CardContent>
@@ -142,7 +138,7 @@ function ContractState({
 export default function CCQ() {
   const { enqueueSnackbar } = useSnackbar();
   const [onChainInfo, setOnChainInfo] = useState<
-    ({ blockNumber: string; contractState: string } | null)[]
+    ({ blockNumber: string; blockTime: string; contractState: string } | null)[]
   >([null, null, null]);
   const [isWorking, setIsWorking] = useState<boolean>(false);
   useEffect(() => {
@@ -174,9 +170,10 @@ export default function CCQ() {
         setOnChainInfo(
           responses.map((response) => {
             const blockNumber = response?.data?.[0]?.result?.number;
+            const blockTime = response?.data?.[0]?.result?.timestamp;
             const contractState = response?.data?.[1]?.result;
             if (blockNumber && contractState) {
-              return { blockNumber, contractState };
+              return { blockNumber, blockTime, contractState };
             }
             return null;
           })
@@ -217,6 +214,7 @@ export default function CCQ() {
             window.ethereum,
             "any"
           );
+          console.log("info at request time", onChainInfo);
           const perChainRequests = CONTRACTS.map(
             ({ chainId, address }, idx) =>
               new PerChainQueryRequest(
@@ -258,10 +256,8 @@ export default function CCQ() {
                 { chainId: `0x${requiredEvmChainId.toString(16)}` },
               ]);
             } catch (switchError: any) {
-              console.log(switchError);
               const addChainParameter =
                 METAMASK_CHAIN_PARAMETERS[requiredEvmChainId];
-              console.log(addChainParameter);
               // This error code indicates that the chain has not been added to MetaMask.
               if (
                 switchError.code === 4902 &&
@@ -361,6 +357,16 @@ export default function CCQ() {
                                 ).substring(2),
                                 16
                               )}
+                            </Typography>
+                            <Typography variant="body2">
+                              {new Date(
+                                parseInt(
+                                  (
+                                    onChainInfo[idx]?.blockTime || "0x00"
+                                  ).substring(2),
+                                  16
+                                ) * 1000
+                              ).toLocaleString()}
                             </Typography>
                             <Typography variant="h6" sx={{ mt: 2 }}>
                               Contract
