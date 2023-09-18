@@ -1,3 +1,4 @@
+import { Launch } from "@mui/icons-material";
 import {
   Button,
   Card,
@@ -27,13 +28,12 @@ import {
   CHAIN_ID_OPTIMISM,
   CHAIN_ID_POLYGON,
 } from "./sdk/consts";
+import chainIdToString from "./utils/chainIdToString";
 import { TESTNET_RPCS_BY_CHAIN } from "./utils/consts";
 import { QueryDemo__factory } from "./utils/contracts";
-import { sleep } from "./utils/sleep";
-import { Launch } from "@mui/icons-material";
 import { QueryDemo } from "./utils/contracts/QueryDemo";
-import chainIdToString from "./utils/chainIdToString";
 import { METAMASK_CHAIN_PARAMETERS } from "./utils/metaMaskChainParameters";
+import { sleep } from "./utils/sleep";
 
 const CONTRACTS = [
   {
@@ -142,6 +142,7 @@ export default function CCQ() {
   >([null, null, null]);
   const [isWorking, setIsWorking] = useState<boolean>(false);
   useEffect(() => {
+    if (isWorking) return; // adding isWorking dependency to trigger updates after a successful tx
     let cancelled = false;
     const fetchOnChainInfo = async () => {
       if (cancelled) return;
@@ -189,7 +190,7 @@ export default function CCQ() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [isWorking]);
   const handleRequest = useCallback(
     (event: any) => {
       if (!onChainInfo[0] || !onChainInfo[1] || !onChainInfo[2]) return;
@@ -202,8 +203,9 @@ export default function CCQ() {
       );
       const address = contractEntry?.address;
       const requiredEvmChainId = contractEntry?.evmId;
+      const rpc = contractEntry?.rpc;
       const explorer = contractEntry?.explorer;
-      if (!address || !requiredEvmChainId) return;
+      if (!address || !requiredEvmChainId || !rpc) return;
       setIsWorking(true);
       (async () => {
         try {
@@ -312,8 +314,27 @@ export default function CCQ() {
               </IconButton>
             ),
           });
-          // TODO: wait is kinda slow, maybe just poll ourselves
-          await tx.wait();
+          let receipt = null;
+          while (!receipt) {
+            try {
+              const response = await axios.post(rpc, {
+                jsonrpc: "2.0",
+                id: 1,
+                method: "eth_getTransactionReceipt",
+                params: [tx.hash],
+              });
+              receipt = response.data.result;
+            } catch (e) {
+              console.error(e);
+            }
+            if (!receipt) {
+              await sleep(1000);
+            }
+          }
+          console.log(receipt);
+          if (receipt?.status !== "0x1") {
+            throw new Error("An error occurred on-chain.");
+          }
           enqueueSnackbar(
             "Transaction confirmed, successfully updated counters!",
             {
