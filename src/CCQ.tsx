@@ -21,7 +21,6 @@ import {
   PerChainQueryRequest,
   QueryRequest,
   QueryResponse,
-  sign,
 } from "./sdk-query";
 import {
   CHAIN_ID_ARBITRUM,
@@ -65,8 +64,8 @@ const CONTRACTS = [
   },
 ];
 
-const ETH_DEV_PRIVATE_KEY =
-  "cfb12303a19cde580bb4dd771639b0d26bc68353645571a8cff516ab2ee113a0";
+// const ETH_DEV_PRIVATE_KEY =
+//   "cfb12303a19cde580bb4dd771639b0d26bc68353645571a8cff516ab2ee113a0";
 const GET_STATE_CALL = eth.abi.encodeFunctionSignature("getState()");
 const GET_MY_COUNTER_CALL = eth.abi.encodeFunctionSignature("getMyCounter()");
 const QUERY_URL = "https://testnet.ccq.vaa.dev/v1/query";
@@ -232,17 +231,22 @@ export default function CCQ() {
           const nonce = 1;
           const request = new QueryRequest(nonce, perChainRequests);
           const serialized = request.serialize();
-          const digest = QueryRequest.digest("TESTNET", serialized);
-          const signature = sign(ETH_DEV_PRIVATE_KEY, digest);
+          // the CCQ server supports self-signed requests or request signing based on API key
+          // const digest = QueryRequest.digest("TESTNET", serialized);
+          // const signature = sign(ETH_DEV_PRIVATE_KEY, digest);
+          // const signatureRequiredApiKey = "my_secret_key"
+          const signatureNotRequiredApiKey =
+            "2d6c22c6-afae-4e54-b36d-5ba118da646a";
           const beforeTime = performance.now();
           enqueueSnackbar("Issuing cross-chain query", { variant: "info" });
           const response = await axios.put<QueryResponse>(
             QUERY_URL,
             {
-              signature,
+              // signature,
               bytes: Buffer.from(serialized).toString("hex"),
             },
-            { headers: { "X-API-Key": "my_secret_key" } }
+            // { headers: { "X-API-Key": signatureRequiredApiKey } }
+            { headers: { "X-API-Key": signatureNotRequiredApiKey } }
           );
           const afterTime = performance.now();
           enqueueSnackbar(
