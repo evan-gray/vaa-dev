@@ -20,8 +20,7 @@ import {
   EthCallQueryRequest,
   PerChainQueryRequest,
   QueryRequest,
-  QueryResponse,
-} from "./sdk-query";
+} from "@wormhole-foundation/wormhole-query-sdk";
 import {
   CHAIN_ID_ARBITRUM,
   CHAIN_ID_OPTIMISM,
@@ -33,6 +32,11 @@ import { QueryDemo__factory } from "./utils/contracts";
 import { QueryDemo } from "./utils/contracts/QueryDemo";
 import { METAMASK_CHAIN_PARAMETERS } from "./utils/metaMaskChainParameters";
 import { sleep } from "./utils/sleep";
+
+type QueryResponse = {
+  signatures: string[];
+  bytes: string;
+};
 
 const CONTRACTS = [
   {
