@@ -44,4 +44,7 @@ export const TESTNET_RPCS_BY_CHAIN: { [id in ChainId]?: string } = {
   23: "https://goerli-rollup.arbitrum.io/rpc",
   24: "https://rpc.ankr.com/optimism_testnet",
   30: "https://goerli.base.org",
+  10003: "https://sepolia-rollup.arbitrum.io/rpc",
+  10004: "https://sepolia.base.org",
+  10005: "https://sepolia.optimism.io/",
 };
