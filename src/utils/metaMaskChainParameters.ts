@@ -161,5 +161,5 @@ export const EVM_RPC_MAP = Object.entries(METAMASK_CHAIN_PARAMETERS).reduce(
     }
     return evmRpcMap;
   },
-  {} as EvmRpcMap
+  {} as EvmRpcMap,
 );

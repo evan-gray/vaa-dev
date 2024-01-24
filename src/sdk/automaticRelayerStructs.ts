@@ -33,14 +33,14 @@ export function parseRefundStatus(index: number) {
   return index === 0
     ? RefundStatus.RefundSent
     : index === 1
-    ? RefundStatus.RefundFail
-    : index === 2
-    ? RefundStatus.CrossChainRefundSent
-    : index === 3
-    ? RefundStatus.CrossChainRefundFailProviderNotSupported
-    : index === 4
-    ? RefundStatus.CrossChainRefundFailNotEnough
-    : RefundStatus.CrossChainRefundFailProviderNotSupported;
+      ? RefundStatus.RefundFail
+      : index === 2
+        ? RefundStatus.CrossChainRefundSent
+        : index === 3
+          ? RefundStatus.CrossChainRefundFailProviderNotSupported
+          : index === 4
+            ? RefundStatus.CrossChainRefundFailNotEnough
+            : RefundStatus.CrossChainRefundFailProviderNotSupported;
 }
 
 export interface VaaKey {
@@ -101,7 +101,7 @@ export enum VaaKeyType {
 }
 
 export function parseWormholeRelayerPayloadType(
-  stringPayload: string | Buffer | Uint8Array
+  stringPayload: string | Buffer | Uint8Array,
 ): RelayerPayloadId {
   const payload =
     typeof stringPayload === "string" ? arrayify(stringPayload) : stringPayload;
@@ -117,7 +117,7 @@ export function parseWormholeRelayerPayloadType(
 export function createVaaKey(
   chainId: number,
   emitterAddress: Buffer,
-  sequence: number | BigNumber
+  sequence: number | BigNumber,
 ): VaaKey {
   return {
     chainId,
@@ -131,7 +131,7 @@ export function parseWormholeRelayerSend(bytes: Buffer): DeliveryInstruction {
   const payloadId = bytes.readUInt8(idx);
   if (payloadId !== RelayerPayloadId.Delivery) {
     throw new Error(
-      `Expected Delivery payload type (${RelayerPayloadId.Delivery}), found: ${payloadId}`
+      `Expected Delivery payload type (${RelayerPayloadId.Delivery}), found: ${payloadId}`,
     );
   }
   idx += 1;
@@ -145,12 +145,12 @@ export function parseWormholeRelayerSend(bytes: Buffer): DeliveryInstruction {
   [payload, idx] = parsePayload(bytes, idx);
 
   const requestedReceiverValue = ethers.BigNumber.from(
-    Uint8Array.prototype.subarray.call(bytes, idx, idx + 32)
+    Uint8Array.prototype.subarray.call(bytes, idx, idx + 32),
   );
   idx += 32;
 
   const extraReceiverValue = ethers.BigNumber.from(
-    Uint8Array.prototype.subarray.call(bytes, idx, idx + 32)
+    Uint8Array.prototype.subarray.call(bytes, idx, idx + 32),
   );
   idx += 32;
 
@@ -210,7 +210,7 @@ function parseVaaKey(bytes: Buffer, idx: number): [VaaKey, number] {
   const emitterAddress = bytes.slice(idx, idx + 32);
   idx += 32;
   const sequence = ethers.BigNumber.from(
-    Uint8Array.prototype.subarray.call(bytes, idx, idx + 8)
+    Uint8Array.prototype.subarray.call(bytes, idx, idx + 8),
   );
   idx += 8;
   return [
@@ -225,7 +225,7 @@ function parseVaaKey(bytes: Buffer, idx: number): [VaaKey, number] {
 
 export function parseEVMExecutionInfoV1(
   bytes: Buffer,
-  idx: number
+  idx: number,
 ): [EVMExecutionInfoV1, number] {
   idx += 31;
   const version = bytes.readUInt8(idx);
@@ -234,24 +234,24 @@ export function parseEVMExecutionInfoV1(
     throw new Error("Unexpected Execution Info version");
   }
   const gasLimit = ethers.BigNumber.from(
-    Uint8Array.prototype.subarray.call(bytes, idx, idx + 32)
+    Uint8Array.prototype.subarray.call(bytes, idx, idx + 32),
   );
   idx += 32;
   const targetChainRefundPerGasUnused = ethers.BigNumber.from(
-    Uint8Array.prototype.subarray.call(bytes, idx, idx + 32)
+    Uint8Array.prototype.subarray.call(bytes, idx, idx + 32),
   );
   idx += 32;
   return [{ gasLimit, targetChainRefundPerGasUnused }, idx];
 }
 
 export function parseWormholeRelayerResend(
-  bytes: Buffer
+  bytes: Buffer,
 ): RedeliveryInstruction {
   let idx = 0;
   const payloadId = bytes.readUInt8(idx);
   if (payloadId !== RelayerPayloadId.Redelivery) {
     throw new Error(
-      `Expected Delivery payload type (${RelayerPayloadId.Redelivery}), found: ${payloadId}`
+      `Expected Delivery payload type (${RelayerPayloadId.Redelivery}), found: ${payloadId}`,
     );
   }
   idx += 1;
@@ -264,7 +264,7 @@ export function parseWormholeRelayerResend(
   idx += 2;
 
   const newRequestedReceiverValue = ethers.BigNumber.from(
-    Uint8Array.prototype.subarray.call(bytes, idx, idx + 32)
+    Uint8Array.prototype.subarray.call(bytes, idx, idx + 32),
   );
   idx += 32;
 
@@ -292,7 +292,7 @@ export function executionInfoToString(encodedExecutionInfo: Buffer): string {
 }
 
 export function deliveryInstructionsPrintable(
-  ix: DeliveryInstruction
+  ix: DeliveryInstruction,
 ): DeliveryInstructionPrintable {
   return {
     targetChainId: ix.targetChainId.toString(),
@@ -319,7 +319,7 @@ export function vaaKeyPrintable(ix: VaaKey): StringLeaves<VaaKey> {
 }
 
 export function redeliveryInstructionPrintable(
-  ix: RedeliveryInstruction
+  ix: RedeliveryInstruction,
 ): RedeliveryInstructionPrintable {
   return {
     deliveryVaaKey: vaaKeyPrintable(ix.deliveryVaaKey),
@@ -361,14 +361,14 @@ export function parseForwardFailureError(bytes: Buffer): string {
   }
   try {
     const amountOfFunds = ethers.BigNumber.from(
-      Uint8Array.prototype.subarray.call(bytes, idx, idx + 32)
+      Uint8Array.prototype.subarray.call(bytes, idx, idx + 32),
     );
     idx += 32;
     const amountOfFundsNeeded = ethers.BigNumber.from(
-      Uint8Array.prototype.subarray.call(bytes, idx, idx + 32)
+      Uint8Array.prototype.subarray.call(bytes, idx, idx + 32),
     );
     return `Not enough funds leftover for forward: Had ${ethers.utils.formatEther(
-      amountOfFunds
+      amountOfFunds,
     )} and needed ${ethers.utils.formatEther(amountOfFundsNeeded)}.`;
   } catch (err) {
     return `Delivery Provider unexpectedly failed in performing forward`;
@@ -376,13 +376,13 @@ export function parseForwardFailureError(bytes: Buffer): string {
 }
 
 export function parseOverrideInfoFromDeliveryEvent(
-  bytes: Buffer
+  bytes: Buffer,
 ): DeliveryOverrideArgs {
   let idx = 0;
   // const version = bytes.readUInt8(idx);
   idx += 1;
   const newReceiverValue = ethers.BigNumber.from(
-    Uint8Array.prototype.subarray.call(bytes, idx, idx + 32)
+    Uint8Array.prototype.subarray.call(bytes, idx, idx + 32),
   );
   idx += 32;
 

@@ -437,7 +437,7 @@ type QueryDemoConstructorParams =
   | ConstructorParameters<typeof ContractFactory>;
 
 const isSuperArgs = (
-  xs: QueryDemoConstructorParams
+  xs: QueryDemoConstructorParams,
 ): xs is ConstructorParameters<typeof ContractFactory> => xs.length > 1;
 
 export class QueryDemo__factory extends ContractFactory {
@@ -453,26 +453,26 @@ export class QueryDemo__factory extends ContractFactory {
     _owner: PromiseOrValue<string>,
     _wormhole: PromiseOrValue<string>,
     _myChainID: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
+    overrides?: Overrides & { from?: PromiseOrValue<string> },
   ): Promise<QueryDemo> {
     return super.deploy(
       _owner,
       _wormhole,
       _myChainID,
-      overrides || {}
+      overrides || {},
     ) as Promise<QueryDemo>;
   }
   override getDeployTransaction(
     _owner: PromiseOrValue<string>,
     _wormhole: PromiseOrValue<string>,
     _myChainID: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
+    overrides?: Overrides & { from?: PromiseOrValue<string> },
   ): TransactionRequest {
     return super.getDeployTransaction(
       _owner,
       _wormhole,
       _myChainID,
-      overrides || {}
+      overrides || {},
     );
   }
   override attach(address: string): QueryDemo {
@@ -489,7 +489,7 @@ export class QueryDemo__factory extends ContractFactory {
   }
   static connect(
     address: string,
-    signerOrProvider: Signer | Provider
+    signerOrProvider: Signer | Provider,
   ): QueryDemo {
     return new Contract(address, _abi, signerOrProvider) as QueryDemo;
   }

@@ -51,7 +51,7 @@ export declare namespace QueryResponse {
     number,
     number,
     string,
-    string
+    string,
   ] & { chainId: number; queryType: number; request: string; response: string };
 
   export type ParsedQueryResponseStruct = {
@@ -67,7 +67,7 @@ export declare namespace QueryResponse {
     number,
     string,
     number,
-    QueryResponse.ParsedPerChainQueryResponseStructOutput[]
+    QueryResponse.ParsedPerChainQueryResponseStructOutput[],
   ] & {
     version: number;
     senderChainId: number;
@@ -101,7 +101,7 @@ export declare namespace QueryResponse {
     BigNumber,
     string,
     BigNumber,
-    QueryResponse.EthCallDataStructOutput[]
+    QueryResponse.EthCallDataStructOutput[],
   ] & {
     requestBlockId: string;
     blockNum: BigNumber;
@@ -125,7 +125,7 @@ export declare namespace QueryDemo {
     string,
     BigNumber,
     BigNumber,
-    BigNumber
+    BigNumber,
   ] & {
     chainID: number;
     contractAddress: string;
@@ -160,91 +160,91 @@ export interface QueryDemoInterface extends utils.Interface {
       | "updateRegistration"
       | "getMyCounter"
       | "getState"
-      | "updateCounters"
+      | "updateCounters",
   ): FunctionFragment;
 
   encodeFunctionData(
     functionFragment: "getResponseDigest",
-    values: [PromiseOrValue<BytesLike>]
+    values: [PromiseOrValue<BytesLike>],
   ): string;
   encodeFunctionData(
     functionFragment: "getResponseHash",
-    values: [PromiseOrValue<BytesLike>]
+    values: [PromiseOrValue<BytesLike>],
   ): string;
   encodeFunctionData(
     functionFragment: "parseAndVerifyQueryResponse",
     values: [
       PromiseOrValue<string>,
       PromiseOrValue<BytesLike>,
-      IWormhole.SignatureStruct[]
-    ]
+      IWormhole.SignatureStruct[],
+    ],
   ): string;
   encodeFunctionData(
     functionFragment: "parseEthCallQueryResponse",
-    values: [QueryResponse.ParsedPerChainQueryResponseStruct]
+    values: [QueryResponse.ParsedPerChainQueryResponseStruct],
   ): string;
   encodeFunctionData(
     functionFragment: "responsePrefix",
-    values?: undefined
+    values?: undefined,
   ): string;
   encodeFunctionData(
     functionFragment: "verifyQueryResponseSignatures",
     values: [
       PromiseOrValue<string>,
       PromiseOrValue<BytesLike>,
-      IWormhole.SignatureStruct[]
-    ]
+      IWormhole.SignatureStruct[],
+    ],
   ): string;
   encodeFunctionData(
     functionFragment: "updateRegistration",
-    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<string>]
+    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<string>],
   ): string;
   encodeFunctionData(
     functionFragment: "getMyCounter",
-    values?: undefined
+    values?: undefined,
   ): string;
   encodeFunctionData(functionFragment: "getState", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "updateCounters",
-    values: [PromiseOrValue<BytesLike>, IWormhole.SignatureStruct[]]
+    values: [PromiseOrValue<BytesLike>, IWormhole.SignatureStruct[]],
   ): string;
 
   decodeFunctionResult(
     functionFragment: "getResponseDigest",
-    data: BytesLike
+    data: BytesLike,
   ): Result;
   decodeFunctionResult(
     functionFragment: "getResponseHash",
-    data: BytesLike
+    data: BytesLike,
   ): Result;
   decodeFunctionResult(
     functionFragment: "parseAndVerifyQueryResponse",
-    data: BytesLike
+    data: BytesLike,
   ): Result;
   decodeFunctionResult(
     functionFragment: "parseEthCallQueryResponse",
-    data: BytesLike
+    data: BytesLike,
   ): Result;
   decodeFunctionResult(
     functionFragment: "responsePrefix",
-    data: BytesLike
+    data: BytesLike,
   ): Result;
   decodeFunctionResult(
     functionFragment: "verifyQueryResponseSignatures",
-    data: BytesLike
+    data: BytesLike,
   ): Result;
   decodeFunctionResult(
     functionFragment: "updateRegistration",
-    data: BytesLike
+    data: BytesLike,
   ): Result;
   decodeFunctionResult(
     functionFragment: "getMyCounter",
-    data: BytesLike
+    data: BytesLike,
   ): Result;
   decodeFunctionResult(functionFragment: "getState", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "updateCounters",
-    data: BytesLike
+    data: BytesLike,
   ): Result;
 
   events: {};
@@ -260,15 +260,15 @@ export interface QueryDemo extends BaseContract {
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
     fromBlockOrBlockhash?: string | number | undefined,
-    toBlock?: string | number | undefined
+    toBlock?: string | number | undefined,
   ): Promise<Array<TEvent>>;
 
   listeners<TEvent extends TypedEvent>(
-    eventFilter?: TypedEventFilter<TEvent>
+    eventFilter?: TypedEventFilter<TEvent>,
   ): Array<TypedListener<TEvent>>;
   listeners(eventName?: string): Array<Listener>;
   removeAllListeners<TEvent extends TypedEvent>(
-    eventFilter: TypedEventFilter<TEvent>
+    eventFilter: TypedEventFilter<TEvent>,
   ): this;
   removeAllListeners(eventName?: string): this;
   off: OnEvent<this>;
@@ -282,7 +282,7 @@ export interface QueryDemo extends BaseContract {
      */
     getResponseDigest(
       response: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<[string]>;
 
     /**
@@ -290,14 +290,14 @@ export interface QueryDemo extends BaseContract {
      */
     getResponseHash(
       response: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<[string]>;
 
     parseAndVerifyQueryResponse(
       wormhole: PromiseOrValue<string>,
       response: PromiseOrValue<BytesLike>,
       signatures: IWormhole.SignatureStruct[],
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<
       [QueryResponse.ParsedQueryResponseStructOutput] & {
         r: QueryResponse.ParsedQueryResponseStructOutput;
@@ -306,7 +306,7 @@ export interface QueryDemo extends BaseContract {
 
     parseEthCallQueryResponse(
       pcr: QueryResponse.ParsedPerChainQueryResponseStruct,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<
       [QueryResponse.EthCallQueryResponseStructOutput] & {
         r: QueryResponse.EthCallQueryResponseStructOutput;
@@ -319,25 +319,25 @@ export interface QueryDemo extends BaseContract {
       _wormhole: PromiseOrValue<string>,
       response: PromiseOrValue<BytesLike>,
       signatures: IWormhole.SignatureStruct[],
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<[void]>;
 
     updateRegistration(
       _chainID: PromiseOrValue<BigNumberish>,
       _contractAddress: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      overrides?: Overrides & { from?: PromiseOrValue<string> },
     ): Promise<ContractTransaction>;
 
     getMyCounter(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     getState(
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<[QueryDemo.ChainEntryStructOutput[]]>;
 
     updateCounters(
       response: PromiseOrValue<BytesLike>,
       signatures: IWormhole.SignatureStruct[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      overrides?: Overrides & { from?: PromiseOrValue<string> },
     ): Promise<ContractTransaction>;
   };
 
@@ -346,7 +346,7 @@ export interface QueryDemo extends BaseContract {
    */
   getResponseDigest(
     response: PromiseOrValue<BytesLike>,
-    overrides?: CallOverrides
+    overrides?: CallOverrides,
   ): Promise<string>;
 
   /**
@@ -354,19 +354,19 @@ export interface QueryDemo extends BaseContract {
    */
   getResponseHash(
     response: PromiseOrValue<BytesLike>,
-    overrides?: CallOverrides
+    overrides?: CallOverrides,
   ): Promise<string>;
 
   parseAndVerifyQueryResponse(
     wormhole: PromiseOrValue<string>,
     response: PromiseOrValue<BytesLike>,
     signatures: IWormhole.SignatureStruct[],
-    overrides?: CallOverrides
+    overrides?: CallOverrides,
   ): Promise<QueryResponse.ParsedQueryResponseStructOutput>;
 
   parseEthCallQueryResponse(
     pcr: QueryResponse.ParsedPerChainQueryResponseStruct,
-    overrides?: CallOverrides
+    overrides?: CallOverrides,
   ): Promise<QueryResponse.EthCallQueryResponseStructOutput>;
 
   responsePrefix(overrides?: CallOverrides): Promise<string>;
@@ -375,25 +375,25 @@ export interface QueryDemo extends BaseContract {
     _wormhole: PromiseOrValue<string>,
     response: PromiseOrValue<BytesLike>,
     signatures: IWormhole.SignatureStruct[],
-    overrides?: CallOverrides
+    overrides?: CallOverrides,
   ): Promise<void>;
 
   updateRegistration(
     _chainID: PromiseOrValue<BigNumberish>,
     _contractAddress: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
+    overrides?: Overrides & { from?: PromiseOrValue<string> },
   ): Promise<ContractTransaction>;
 
   getMyCounter(overrides?: CallOverrides): Promise<BigNumber>;
 
   getState(
-    overrides?: CallOverrides
+    overrides?: CallOverrides,
   ): Promise<QueryDemo.ChainEntryStructOutput[]>;
 
   updateCounters(
     response: PromiseOrValue<BytesLike>,
     signatures: IWormhole.SignatureStruct[],
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
+    overrides?: Overrides & { from?: PromiseOrValue<string> },
   ): Promise<ContractTransaction>;
 
   callStatic: {
@@ -402,7 +402,7 @@ export interface QueryDemo extends BaseContract {
      */
     getResponseDigest(
       response: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<string>;
 
     /**
@@ -410,19 +410,19 @@ export interface QueryDemo extends BaseContract {
      */
     getResponseHash(
       response: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<string>;
 
     parseAndVerifyQueryResponse(
       wormhole: PromiseOrValue<string>,
       response: PromiseOrValue<BytesLike>,
       signatures: IWormhole.SignatureStruct[],
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<QueryResponse.ParsedQueryResponseStructOutput>;
 
     parseEthCallQueryResponse(
       pcr: QueryResponse.ParsedPerChainQueryResponseStruct,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<QueryResponse.EthCallQueryResponseStructOutput>;
 
     responsePrefix(overrides?: CallOverrides): Promise<string>;
@@ -431,25 +431,25 @@ export interface QueryDemo extends BaseContract {
       _wormhole: PromiseOrValue<string>,
       response: PromiseOrValue<BytesLike>,
       signatures: IWormhole.SignatureStruct[],
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<void>;
 
     updateRegistration(
       _chainID: PromiseOrValue<BigNumberish>,
       _contractAddress: PromiseOrValue<string>,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<void>;
 
     getMyCounter(overrides?: CallOverrides): Promise<BigNumber>;
 
     getState(
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<QueryDemo.ChainEntryStructOutput[]>;
 
     updateCounters(
       response: PromiseOrValue<BytesLike>,
       signatures: IWormhole.SignatureStruct[],
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<void>;
   };
 
@@ -461,7 +461,7 @@ export interface QueryDemo extends BaseContract {
      */
     getResponseDigest(
       response: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<BigNumber>;
 
     /**
@@ -469,19 +469,19 @@ export interface QueryDemo extends BaseContract {
      */
     getResponseHash(
       response: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<BigNumber>;
 
     parseAndVerifyQueryResponse(
       wormhole: PromiseOrValue<string>,
       response: PromiseOrValue<BytesLike>,
       signatures: IWormhole.SignatureStruct[],
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<BigNumber>;
 
     parseEthCallQueryResponse(
       pcr: QueryResponse.ParsedPerChainQueryResponseStruct,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<BigNumber>;
 
     responsePrefix(overrides?: CallOverrides): Promise<BigNumber>;
@@ -490,13 +490,13 @@ export interface QueryDemo extends BaseContract {
       _wormhole: PromiseOrValue<string>,
       response: PromiseOrValue<BytesLike>,
       signatures: IWormhole.SignatureStruct[],
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<BigNumber>;
 
     updateRegistration(
       _chainID: PromiseOrValue<BigNumberish>,
       _contractAddress: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      overrides?: Overrides & { from?: PromiseOrValue<string> },
     ): Promise<BigNumber>;
 
     getMyCounter(overrides?: CallOverrides): Promise<BigNumber>;
@@ -506,7 +506,7 @@ export interface QueryDemo extends BaseContract {
     updateCounters(
       response: PromiseOrValue<BytesLike>,
       signatures: IWormhole.SignatureStruct[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      overrides?: Overrides & { from?: PromiseOrValue<string> },
     ): Promise<BigNumber>;
   };
 
@@ -516,7 +516,7 @@ export interface QueryDemo extends BaseContract {
      */
     getResponseDigest(
       response: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<PopulatedTransaction>;
 
     /**
@@ -524,19 +524,19 @@ export interface QueryDemo extends BaseContract {
      */
     getResponseHash(
       response: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<PopulatedTransaction>;
 
     parseAndVerifyQueryResponse(
       wormhole: PromiseOrValue<string>,
       response: PromiseOrValue<BytesLike>,
       signatures: IWormhole.SignatureStruct[],
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<PopulatedTransaction>;
 
     parseEthCallQueryResponse(
       pcr: QueryResponse.ParsedPerChainQueryResponseStruct,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<PopulatedTransaction>;
 
     responsePrefix(overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -545,13 +545,13 @@ export interface QueryDemo extends BaseContract {
       _wormhole: PromiseOrValue<string>,
       response: PromiseOrValue<BytesLike>,
       signatures: IWormhole.SignatureStruct[],
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<PopulatedTransaction>;
 
     updateRegistration(
       _chainID: PromiseOrValue<BigNumberish>,
       _contractAddress: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      overrides?: Overrides & { from?: PromiseOrValue<string> },
     ): Promise<PopulatedTransaction>;
 
     getMyCounter(overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -561,7 +561,7 @@ export interface QueryDemo extends BaseContract {
     updateCounters(
       response: PromiseOrValue<BytesLike>,
       signatures: IWormhole.SignatureStruct[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      overrides?: Overrides & { from?: PromiseOrValue<string> },
     ): Promise<PopulatedTransaction>;
   };
 }
