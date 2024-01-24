@@ -22,9 +22,9 @@ import {
   QueryRequest,
 } from "@wormhole-foundation/wormhole-query-sdk";
 import {
-  CHAIN_ID_ARBITRUM,
-  CHAIN_ID_OPTIMISM,
-  CHAIN_ID_POLYGON,
+  CHAIN_ID_ARBITRUM_SEPOLIA,
+  CHAIN_ID_BASE_SEPOLIA,
+  CHAIN_ID_OPTIMISM_SEPOLIA,
 } from "./sdk/consts";
 import chainIdToString from "./utils/chainIdToString";
 import { TESTNET_RPCS_BY_CHAIN } from "./utils/consts";
@@ -40,31 +40,31 @@ type QueryResponse = {
 
 const CONTRACTS = [
   {
-    chainId: CHAIN_ID_POLYGON,
-    evmId: 80001,
-    name: "Polygon Mumbai",
-    address: "0x130Db1B83d205562461eD0720B37f1FBC21Bf67F",
+    chainId: CHAIN_ID_ARBITRUM_SEPOLIA,
+    evmId: 421614,
+    name: "Arbitrum Sepolia",
+    address: "0x5f1619d5e75225D58f268BBd5E91101345F02ce3",
     backgroundColor: "#DDA0DD20",
-    rpc: "https://rpc-mumbai.maticvigil.com", //TESTNET_RPCS_BY_CHAIN[CHAIN_ID_POLYGON],
-    explorer: "https://mumbai.polygonscan.com",
+    rpc: TESTNET_RPCS_BY_CHAIN[CHAIN_ID_ARBITRUM_SEPOLIA],
+    explorer: "https://sepolia.arbiscan.io",
   },
   {
-    chainId: CHAIN_ID_ARBITRUM,
-    evmId: 421613,
-    name: "Arbitrum Goerli",
-    address: "0x6E36177f26A3C9cD2CE8DDF1b12904fe36deA47F",
+    chainId: CHAIN_ID_BASE_SEPOLIA,
+    evmId: 84532,
+    name: "Base Sepolia",
+    address: "0x2EBE6ec1EeAd93Fb612DDa77130EBD8Ad7108C33",
     backgroundColor: "#B0E0E620",
-    rpc: TESTNET_RPCS_BY_CHAIN[CHAIN_ID_ARBITRUM],
-    explorer: "https://goerli.arbiscan.io",
+    rpc: TESTNET_RPCS_BY_CHAIN[CHAIN_ID_BASE_SEPOLIA],
+    explorer: "https://sepolia.basescan.org",
   },
   {
-    chainId: CHAIN_ID_OPTIMISM,
-    evmId: 420,
-    name: "Optimism Goerli",
-    address: "0x4A74b06f075D17fe91690719Eb285687AEcE5748",
+    chainId: CHAIN_ID_OPTIMISM_SEPOLIA,
+    evmId: 11155420,
+    name: "Optimism Sepolia",
+    address: "0xb60aF9c7F74B9209538e4f56aA58a89a92a54d89",
     backgroundColor: "#FF000020",
-    rpc: "https://goerli.optimism.io", //TESTNET_RPCS_BY_CHAIN[CHAIN_ID_OPTIMISM],
-    explorer: "https://goerli-optimism.etherscan.io",
+    rpc: TESTNET_RPCS_BY_CHAIN[CHAIN_ID_OPTIMISM_SEPOLIA],
+    explorer: "https://sepolia-optimism.etherscan.io",
   },
 ];
 
