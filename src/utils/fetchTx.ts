@@ -41,7 +41,7 @@ export const LOG_MESSAGE_PUBLISHED_TOPIC =
 function EVMReceiptToMessageIds(
   chainId: number,
   logs: any[],
-  env: Env
+  env: Env,
 ): string[] {
   const chainName = coalesceChainName(chainId as ChainId);
   return logs
@@ -49,13 +49,13 @@ function EVMReceiptToMessageIds(
       (l) =>
         l.address.toLowerCase() ===
           CONTRACTS[env][chainName].core?.toLowerCase() &&
-        l.topics[0] === LOG_MESSAGE_PUBLISHED_TOPIC
+        l.topics[0] === LOG_MESSAGE_PUBLISHED_TOPIC,
     )
     .map(
       (l) =>
         `${chainId}/${l.topics[1].slice(2)}/${BigInt(
-          l.data.slice(0, 66)
-        ).toString()}`
+          l.data.slice(0, 66),
+        ).toString()}`,
     );
 }
 
@@ -82,7 +82,7 @@ const makeFetchTxForChain =
               messageIds: EVMReceiptToMessageIds(
                 Number(chain),
                 receipt.logs,
-                env
+                env,
               ),
             } as TxInfo)
           );
@@ -93,10 +93,10 @@ export default async function fetchTx(hash: string): Promise<TxInfo[]> {
   return (
     await Promise.all([
       ...Object.entries(MAINNET_RPCS_BY_CHAIN).map(
-        makeFetchTxForChain(hash, "MAINNET")
+        makeFetchTxForChain(hash, "MAINNET"),
       ),
       ...Object.entries(TESTNET_RPCS_BY_CHAIN).map(
-        makeFetchTxForChain(hash, "TESTNET")
+        makeFetchTxForChain(hash, "TESTNET"),
       ),
     ])
   )

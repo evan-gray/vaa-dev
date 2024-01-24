@@ -43,8 +43,8 @@ function MessageInfo({ id, env }: { id: string; env: Env }) {
       for (const rpc of env === "MAINNET"
         ? MAINNET_RPCS
         : env === "TESTNET"
-        ? TESTNET_RPCS
-        : []) {
+          ? TESTNET_RPCS
+          : []) {
         if (cancelled) return;
         const vaaUrl = `${rpc}/v1/signed_vaa/${chain}/${emitter}/${sequence}`;
         const response = await axios.get(vaaUrl);
@@ -129,7 +129,7 @@ export default function Transaction() {
       const value: string = e.target.value.trim();
       replace(`/tx/${encodeURIComponent(value)}`);
     },
-    [replace]
+    [replace],
   );
   return (
     <Grid container spacing={2}>
@@ -163,7 +163,7 @@ export default function Transaction() {
                       id={id}
                       env={info.env}
                     />
-                  ))
+                  )),
                 )
               ) : (
                 <Typography>No messages found</Typography>

@@ -68,7 +68,7 @@ function idToStr(id: number): string {
 function transferTypeToString(
   transferType:
     | TokenBridgePayload.Transfer
-    | TokenBridgePayload.TransferWithPayload
+    | TokenBridgePayload.TransferWithPayload,
 ): string {
   if (transferType === TokenBridgePayload.Transfer) {
     return `${transferType} (Transfer)`;
@@ -82,7 +82,7 @@ function transferTypeToString(
 const vaaToString = (
   vaa: ParsedVaa,
   knownEmitter: string | undefined,
-  handleHover: (e: any) => void
+  handleHover: (e: any) => void,
 ) =>
   [
     `  version: ${vaa.version},`,
@@ -129,7 +129,7 @@ const vaaToString = (
 
 const tokenTransferToString = (
   tokenTransfer: TokenTransfer,
-  handleHover: (e: any) => void
+  handleHover: (e: any) => void,
 ) =>
   [
     `  payloadType: ${transferTypeToString(tokenTransfer.payloadType)},`,
@@ -141,13 +141,13 @@ const tokenTransferToString = (
     ...(tokenTransfer.payloadType === TokenBridgePayload.Transfer
       ? [`  fee: ${tokenTransfer.fee?.toString()},`]
       : tokenTransfer.payloadType === TokenBridgePayload.TransferWithPayload
-      ? [
-          `  fromAddress: ${tokenTransfer.fromAddress?.toString("hex")},`,
-          `  tokenTransferPayload: ${tokenTransfer.tokenTransferPayload.toString(
-            "hex"
-          )}`,
-        ]
-      : []),
+        ? [
+            `  fromAddress: ${tokenTransfer.fromAddress?.toString("hex")},`,
+            `  tokenTransferPayload: ${tokenTransfer.tokenTransferPayload.toString(
+              "hex",
+            )}`,
+          ]
+        : []),
   ].map((s) => {
     const key = s.split(":")[0].trim();
     return (
@@ -200,14 +200,14 @@ function RelayStatus({
       try {
         const response = await axios.get(vaaUrl);
         console.log(
-          response?.data?.[0]?.metadata?.deliveryRecord?.resultString
+          response?.data?.[0]?.metadata?.deliveryRecord?.resultString,
         );
         if (
           !cancelled &&
           response?.data?.[0]?.metadata?.deliveryRecord?.resultString
         ) {
           setResultString(
-            response?.data?.[0]?.metadata?.deliveryRecord?.resultString
+            response?.data?.[0]?.metadata?.deliveryRecord?.resultString,
           );
           return;
         }
@@ -252,7 +252,7 @@ export function DecoderComponent({
       const hasPrefix = isHex && vaaString.toLowerCase().startsWith("0x");
       const buf = Buffer.from(
         hasPrefix ? vaaString.slice(2) : vaaString,
-        isHex ? "hex" : "base64"
+        isHex ? "hex" : "base64",
       );
       const vaa = parseVaa(buf);
       const vaaIndexes = vaaToIndexes(buf);
@@ -283,11 +283,11 @@ export function DecoderComponent({
           const type = parseWormholeRelayerPayloadType(vaa.payload);
           if (type === RelayerPayloadId.Delivery) {
             automaticRelay = deliveryInstructionsPrintable(
-              parseWormholeRelayerSend(vaa.payload)
+              parseWormholeRelayerSend(vaa.payload),
             );
           } else if (type === RelayerPayloadId.Redelivery) {
             automaticRelay = redeliveryInstructionPrintable(
-              parseWormholeRelayerResend(vaa.payload)
+              parseWormholeRelayerResend(vaa.payload),
             );
           }
         } catch (e) {
@@ -303,8 +303,8 @@ export function DecoderComponent({
         knownEmitter: isTokenBridgeEmitter
           ? "Token Bridge"
           : isAutomaticRelayerEmitter
-          ? "Automatic Relayer"
-          : undefined,
+            ? "Automatic Relayer"
+            : undefined,
       });
     } catch (e) {
       console.error(e);
@@ -325,7 +325,7 @@ export function DecoderComponent({
         hoverIndex &&
         (hoverIndex.startsWith("payload-")
           ? parsed?.tokenBridgeIndexes?.[hoverIndex.substring(8)]?.map(
-              (n) => n + (parsed?.vaaIndexes?.payload?.[0] || 0)
+              (n) => n + (parsed?.vaaIndexes?.payload?.[0] || 0),
             )
           : parsed?.vaaIndexes?.[hoverIndex]);
       if (isHex && indexes) {
@@ -434,7 +434,7 @@ export default function Decoder() {
       const value: string = e.target.value.trim();
       replace(`/parse/${encodeURIComponent(value)}`);
     },
-    [replace]
+    [replace],
   );
   return (
     <DecoderComponent vaaString={vaaString} handleHexChange={handleHexChange} />

@@ -844,19 +844,19 @@ const DEVNET = {
  *
  * (Do not delete this declaration!)
  */
-const isTestnetContracts: ChainContracts = TESTNET;
+// const isTestnetContracts: ChainContracts = TESTNET;
 
 /**
  *
  * See [[isTestnetContracts]]
  */
-const isMainnetContracts: ChainContracts = MAINNET;
+// const isMainnetContracts: ChainContracts = MAINNET;
 
 /**
  *
  * See [[isTestnetContracts]]
  */
-const isDevnetContracts: ChainContracts = DEVNET;
+// const isDevnetContracts: ChainContracts = DEVNET;
 
 /**
  *
@@ -924,7 +924,7 @@ export const CHAIN_ID_TO_NAME: ChainIdToName = Object.entries(CHAINS).reduce(
     obj[id] = name;
     return obj;
   },
-  {} as any
+  {} as any,
 ) as ChainIdToName;
 
 /**
@@ -979,7 +979,7 @@ export function isChain(chain: number | string): chain is ChainId | ChainName {
  * ```
  */
 export function assertChain(
-  chain: number | string
+  chain: number | string,
 ): asserts chain is ChainId | ChainName {
   if (!isChain(chain)) {
     if (typeof chain === "number") {
@@ -999,13 +999,13 @@ export function toChainName(chainId: ChainId): ChainName {
 }
 
 export function toCosmWasmChainId(
-  chainName: CosmWasmChainName
+  chainName: CosmWasmChainName,
 ): CosmWasmChainId {
   return CHAINS[chainName];
 }
 
 export function coalesceCosmWasmChainId(
-  chain: CosmWasmChainId | CosmWasmChainName
+  chain: CosmWasmChainId | CosmWasmChainName,
 ): CosmWasmChainId {
   // this is written in a way that for invalid inputs (coming from vanilla
   // javascript or someone doing type casting) it will always return undefined.
@@ -1034,28 +1034,28 @@ export function coalesceChainName(chain: ChainId | ChainName): ChainName {
  * the return type.
  */
 export function isEVMChain(
-  chain: ChainId | ChainName
+  chain: ChainId | ChainName,
 ): chain is EVMChainId | EVMChainName {
   const chainName = coalesceChainName(chain);
   return EVMChainNames.includes(chainName as unknown as EVMChainName);
 }
 
 export function isCosmWasmChain(
-  chain: ChainId | ChainName
+  chain: ChainId | ChainName,
 ): chain is CosmWasmChainId | CosmWasmChainName {
   const chainName = coalesceChainName(chain);
   return CosmWasmChainNames.includes(chainName as unknown as CosmWasmChainName);
 }
 
 export function isTerraChain(
-  chain: ChainId | ChainName
+  chain: ChainId | ChainName,
 ): chain is TerraChainId | TerraChainName {
   const chainName = coalesceChainName(chain);
   return TerraChainNames.includes(chainName as unknown as TerraChainName);
 }
 
 export function isSolanaChain(
-  chain: ChainId | ChainName
+  chain: ChainId | ChainName,
 ): chain is SolanaChainId | SolanaChainName {
   const chainName = coalesceChainName(chain);
   return SolanaChainNames.includes(chainName as unknown as SolanaChainName);
@@ -1069,7 +1069,7 @@ export function isSolanaChain(
  *
  */
 export function assertEVMChain(
-  chain: ChainId | ChainName
+  chain: ChainId | ChainName,
 ): asserts chain is EVMChainId | EVMChainName {
   if (!isEVMChain(chain)) {
     throw Error(`Expected an EVM chain, but ${chain} is not`);

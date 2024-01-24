@@ -12,7 +12,7 @@ import { HashRouter as Router } from "react-router-dom";
 import App from "./App";
 
 const root = ReactDOM.createRoot(
-  document.getElementById("root") as HTMLElement
+  document.getElementById("root") as HTMLElement,
 );
 const theme = responsiveFontSizes(
   createTheme({
@@ -57,7 +57,7 @@ const theme = responsiveFontSizes(
         },
       },
     },
-  })
+  }),
 );
 root.render(
   <React.StrictMode>
@@ -69,5 +69,5 @@ root.render(
         </SnackbarProvider>
       </Router>
     </ThemeProvider>
-  </React.StrictMode>
+  </React.StrictMode>,
 );
