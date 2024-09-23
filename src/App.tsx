@@ -80,7 +80,7 @@ function App() {
           <Route exact path={["/parse", "/parse/:vaa"]}>
             <Alert variant="outlined" severity="info" sx={{ mb: 2 }}>
               This functionality is now available on{" "}
-              <Link href="https://wormholescan.io/#/vaa-parser">
+              <Link href="https://wormholescan.io/#/developers/vaa-parser">
                 Wormhole Scan
               </Link>
             </Alert>
@@ -89,7 +89,7 @@ function App() {
           <Route exact path={["/tx", "/tx/:hash"]}>
             <Alert variant="outlined" severity="info" sx={{ mb: 2 }}>
               This functionality is now available on{" "}
-              <Link href="https://wormholescan.io/#/vaa-parser">
+              <Link href="https://wormholescan.io/#/developers/vaa-parser">
                 Wormhole Scan
               </Link>
             </Alert>
